@@ -1,0 +1,1174 @@
+This is nasm.info, produced by Makeinfo version 3.12f from nasmdoc.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* NASM: (nasm).                The Netwide Assembler for x86.
+END-INFO-DIR-ENTRY
+
+
+   This file documents NASM, the Netwide Assembler: an assembler
+targetting the Intel x86 series of processors, with portable source.
+
+   Copyright 1997 Simon Tatham
+
+   All rights reserved. This document is redistributable under the
+licence given in the file "Licence" distributed in the NASM archive.
+
+
+File: nasm.info,  Node: Section A.22,  Next: Section A.23,  Prev: Section A.21,  Up: Appendix A
+
+A.22. `CPUID': Get CPU Identification Code
+******************************************
+
+     CPUID                         ; 0F A2                [PENT]
+
+   `CPUID' returns various information about the processor it is being
+executed on. It fills the four registers `EAX', `EBX', `ECX' and `EDX'
+with information, which varies depending on the input contents of `EAX'.
+
+   `CPUID' also acts as a barrier to serialise instruction execution:
+executing the `CPUID' instruction guarantees that all the effects
+(memory modification, flag modification, register modification) of
+previous instructions have been completed before the next instruction
+gets fetched.
+
+   The information returned is as follows:
+
+   * If `EAX' is zero on input, `EAX' on output holds the maximum
+     acceptable input value of `EAX', and `EBX:EDX:ECX' contain the
+     string `"GenuineIntel"' (or not, if you have a clone processor).
+     That is to say, `EBX' contains `"Genu"' (in NASM's own sense of
+     character constants, described in *Note Section 3.4.2::), `EDX'
+     contains `"ineI"' and `ECX' contains `"ntel"'.
+
+   * If `EAX' is one on input, `EAX' on output contains version
+     information about the processor, and `EDX' contains a set of
+     feature flags, showing the presence and absence of various
+     features. For example, bit 8 is set if the `CMPXCHG8B' instruction
+     (*Note Section A.21::) is supported, bit 15 is set if the
+     conditional move instructions (*Note Section A.17:: and *Note
+     Section A.34::) are supported, and bit 23 is set if MMX
+     instructions are supported.
+
+   * If `EAX' is two on input, `EAX', `EBX', `ECX' and `EDX' all
+     contain information about caches and TLBs (Translation Lookahead
+     Buffers).
+
+   For more information on the data returned from `CPUID', see the
+documentation on Intel's web site.
+
+
+File: nasm.info,  Node: Section A.23,  Next: Section A.24,  Prev: Section A.22,  Up: Appendix A
+
+A.23. `DAA', `DAS': Decimal Adjustments
+***************************************
+
+     DAA                           ; 27                   [8086]
+     DAS                           ; 2F                   [8086]
+
+   These instructions are used in conjunction with the add and subtract
+instructions to perform binary-coded decimal arithmetic in _packed_
+(one BCD digit per nibble) form. For the unpacked equivalents, see
+*Note Section A.4::.
+
+   `DAA' should be used after a one-byte `ADD' instruction whose
+destination was the `AL' register: by means of examining the value in
+the `AL' and also the auxiliary carry flag `AF', it determines whether
+either digit of the addition has overflowed, and adjusts it (and sets
+the carry and auxiliary-carry flags) if so. You can add long BCD
+strings together by doing `ADD'/`DAA' on the low two digits, then doing
+`ADC'/`DAA' on each subsequent pair of digits.
+
+   `DAS' works similarly to `DAA', but is for use after `SUB'
+instructions rather than `ADD'.
+
+
+File: nasm.info,  Node: Section A.24,  Next: Section A.25,  Prev: Section A.23,  Up: Appendix A
+
+A.24. `DEC': Decrement Integer
+******************************
+
+     DEC reg16                     ; o16 48+r             [8086]
+     DEC reg32                     ; o32 48+r             [386]
+     DEC r/m8                      ; FE /1                [8086]
+     DEC r/m16                     ; o16 FF /1            [8086]
+     DEC r/m32                     ; o32 FF /1            [386]
+
+   `DEC' subtracts 1 from its operand. It does _not_ affect the carry
+flag: to affect the carry flag, use `SUB something,1' (see *Note
+Section A.159::). See also `INC' (*Note Section A.79::).
+
+
+File: nasm.info,  Node: Section A.25,  Next: Section A.26,  Prev: Section A.24,  Up: Appendix A
+
+A.25. `DIV': Unsigned Integer Divide
+************************************
+
+     DIV r/m8                      ; F6 /6                [8086]
+     DIV r/m16                     ; o16 F7 /6            [8086]
+     DIV r/m32                     ; o32 F7 /6            [386]
+
+   `DIV' performs unsigned integer division. The explicit operand
+provided is the divisor; the dividend and destination operands are
+implicit, in the following way:
+
+   * For `DIV r/m8', `AX' is divided by the given operand; the quotient
+     is stored in `AL' and the remainder in `AH'.
+
+   * For `DIV r/m16', `DX:AX' is divided by the given operand; the
+     quotient is stored in `AX' and the remainder in `DX'.
+
+   * For `DIV r/m32', `EDX:EAX' is divided by the given operand; the
+     quotient is stored in `EAX' and the remainder in `EDX'.
+
+   Signed integer division is performed by the `IDIV' instruction: see
+*Note Section A.76::.
+
+
+File: nasm.info,  Node: Section A.26,  Next: Section A.27,  Prev: Section A.25,  Up: Appendix A
+
+A.26. `EMMS': Empty MMX State
+*****************************
+
+     EMMS                          ; 0F 77                [PENT,MMX]
+
+   `EMMS' sets the FPU tag word (marking which floating-point registers
+are available) to all ones, meaning all registers are available for the
+FPU to use. It should be used after executing MMX instructions and
+before executing any subsequent floating-point operations.
+
+
+File: nasm.info,  Node: Section A.27,  Next: Section A.28,  Prev: Section A.26,  Up: Appendix A
+
+A.27. `ENTER': Create Stack Frame
+*********************************
+
+     ENTER imm,imm                 ; C8 iw ib             [186]
+
+   `ENTER' constructs a stack frame for a high-level language procedure
+call. The first operand (the `iw' in the opcode definition above refers
+to the first operand) gives the amount of stack space to allocate for
+local variables; the second (the `ib' above) gives the nesting level of
+the procedure (for languages like Pascal, with nested procedures).
+
+   The function of `ENTER', with a nesting level of zero, is equivalent
+to
+
+               PUSH EBP            ; or PUSH BP         in 16 bits
+               MOV EBP,ESP         ; or MOV BP,SP       in 16 bits
+               SUB ESP,operand1    ; or SUB SP,operand1 in 16 bits
+
+   This creates a stack frame with the procedure parameters accessible
+upwards from `EBP', and local variables accessible downwards from `EBP'.
+
+   With a nesting level of one, the stack frame created is 4 (or 2)
+bytes bigger, and the value of the final frame pointer `EBP' is
+accessible in memory at `[EBP-4]'.
+
+   This allows `ENTER', when called with a nesting level of two, to look
+at the stack frame described by the _previous_ value of `EBP', find the
+frame pointer at offset -4 from that, and push it along with its new
+frame pointer, so that when a level-two procedure is called from within
+a level-one procedure, `[EBP-4]' holds the frame pointer of the most
+recent level-one procedure call and `[EBP-8]' holds that of the most
+recent level-two call. And so on, for nesting levels up to 31.
+
+   Stack frames created by `ENTER' can be destroyed by the `LEAVE'
+instruction: see *Note Section A.94::.
+
+
+File: nasm.info,  Node: Section A.28,  Next: Section A.29,  Prev: Section A.27,  Up: Appendix A
+
+A.28. `F2XM1': Calculate 2**X-1
+*******************************
+
+     F2XM1                         ; D9 F0                [8086,FPU]
+
+   `F2XM1' raises 2 to the power of `ST0', subtracts one, and stores
+the result back into `ST0'. The initial contents of `ST0' must be a
+number in the range -1 to +1.
+
+
+File: nasm.info,  Node: Section A.29,  Next: Section A.30,  Prev: Section A.28,  Up: Appendix A
+
+A.29. `FABS': Floating-Point Absolute Value
+*******************************************
+
+     FABS                          ; D9 E1                [8086,FPU]
+
+   `FABS' computes the absolute value of `ST0', storing the result back
+in `ST0'.
+
+
+File: nasm.info,  Node: Section A.30,  Next: Section A.31,  Prev: Section A.29,  Up: Appendix A
+
+A.30. `FADD', `FADDP': Floating-Point Addition
+**********************************************
+
+     FADD mem32                    ; D8 /0                [8086,FPU]
+     FADD mem64                    ; DC /0                [8086,FPU]
+
+     FADD fpureg                   ; D8 C0+r              [8086,FPU]
+     FADD ST0,fpureg               ; D8 C0+r              [8086,FPU]
+
+     FADD TO fpureg                ; DC C0+r              [8086,FPU]
+     FADD fpureg,ST0               ; DC C0+r              [8086,FPU]
+
+     FADDP fpureg                  ; DE C0+r              [8086,FPU]
+     FADDP fpureg,ST0              ; DE C0+r              [8086,FPU]
+
+   `FADD', given one operand, adds the operand to `ST0' and stores the
+result back in `ST0'. If the operand has the `TO' modifier, the result
+is stored in the register given rather than in `ST0'.
+
+   `FADDP' performs the same function as `FADD TO', but pops the
+register stack after storing the result.
+
+   The given two-operand forms are synonyms for the one-operand forms.
+
+
+File: nasm.info,  Node: Section A.31,  Next: Section A.32,  Prev: Section A.30,  Up: Appendix A
+
+A.31. `FBLD', `FBSTP': BCD Floating-Point Load and Store
+********************************************************
+
+     FBLD mem80                    ; DF /4                [8086,FPU]
+     FBSTP mem80                   ; DF /6                [8086,FPU]
+
+   `FBLD' loads an 80-bit (ten-byte) packed binary-coded decimal number
+from the given memory address, converts it to a real, and pushes it on
+the register stack. `FBSTP' stores the value of `ST0', in packed BCD,
+at the given address and then pops the register stack.
+
+
+File: nasm.info,  Node: Section A.32,  Next: Section A.33,  Prev: Section A.31,  Up: Appendix A
+
+A.32. `FCHS': Floating-Point Change Sign
+****************************************
+
+     FCHS                          ; D9 E0                [8086,FPU]
+
+   `FCHS' negates the number in `ST0': negative numbers become
+positive, and vice versa.
+
+
+File: nasm.info,  Node: Section A.33,  Next: Section A.34,  Prev: Section A.32,  Up: Appendix A
+
+A.33. `FCLEX', {FNCLEX}: Clear Floating-Point Exceptions
+********************************************************
+
+     FCLEX                         ; 9B DB E2             [8086,FPU]
+     FNCLEX                        ; DB E2                [8086,FPU]
+
+   `FCLEX' clears any floating-point exceptions which may be pending.
+`FNCLEX' does the same thing but doesn't wait for previous floating-
+point operations (including the _handling_ of pending exceptions) to
+finish first.
+
+
+File: nasm.info,  Node: Section A.34,  Next: Section A.35,  Prev: Section A.33,  Up: Appendix A
+
+A.34. `FCMOVcc': Floating-Point Conditional Move
+************************************************
+
+     FCMOVB fpureg                 ; DA C0+r              [P6,FPU]
+     FCMOVB ST0,fpureg             ; DA C0+r              [P6,FPU]
+
+     FCMOVBE fpureg                ; DA D0+r              [P6,FPU]
+     FCMOVBE ST0,fpureg            ; DA D0+r              [P6,FPU]
+
+     FCMOVE fpureg                 ; DA C8+r              [P6,FPU]
+     FCMOVE ST0,fpureg             ; DA C8+r              [P6,FPU]
+
+     FCMOVNB fpureg                ; DB C0+r              [P6,FPU]
+     FCMOVNB ST0,fpureg            ; DB C0+r              [P6,FPU]
+
+     FCMOVNBE fpureg               ; DB D0+r              [P6,FPU]
+     FCMOVNBE ST0,fpureg           ; DB D0+r              [P6,FPU]
+
+     FCMOVNE fpureg                ; DB C8+r              [P6,FPU]
+     FCMOVNE ST0,fpureg            ; DB C8+r              [P6,FPU]
+
+     FCMOVNU fpureg                ; DB D8+r              [P6,FPU]
+     FCMOVNU ST0,fpureg            ; DB D8+r              [P6,FPU]
+
+     FCMOVU fpureg                 ; DA D8+r              [P6,FPU]
+     FCMOVU ST0,fpureg             ; DA D8+r              [P6,FPU]
+
+   The `FCMOV' instructions perform conditional move operations: each of
+them moves the contents of the given register into `ST0' if its
+condition is satisfied, and does nothing if not.
+
+   The conditions are not the same as the standard condition codes used
+with conditional jump instructions. The conditions `B', `BE', `NB',
+`NBE', `E' and `NE' are exactly as normal, but none of the other
+standard ones are supported. Instead, the condition `U' and its
+counterpart `NU' are provided; the `U' condition is satisfied if the
+last two floating-point numbers compared were _unordered_, i.e. they
+were not equal but neither one could be said to be greater than the
+other, for example if they were NaNs. (The flag state which signals
+this is the setting of the parity flag: so the `U' condition is
+notionally equivalent to `PE', and `NU' is equivalent to `PO'.)
+
+   The `FCMOV' conditions test the main processor's status flags, not
+the FPU status flags, so using `FCMOV' directly after `FCOM' will not
+work. Instead, you should either use `FCOMI' which writes directly to
+the main CPU flags word, or use `FSTSW' to extract the FPU flags.
+
+   Although the `FCMOV' instructions are flagged `P6' above, they may
+not be supported by all Pentium Pro processors; the `CPUID' instruction
+(*Note Section A.22::) will return a bit which indicates whether
+conditional moves are supported.
+
+
+File: nasm.info,  Node: Section A.35,  Next: Section A.36,  Prev: Section A.34,  Up: Appendix A
+
+A.35. `FCOM', `FCOMP', `FCOMPP', `FCOMI', `FCOMIP': Floating-Point Compare
+**************************************************************************
+
+     FCOM mem32                    ; D8 /2                [8086,FPU]
+     FCOM mem64                    ; DC /2                [8086,FPU]
+     FCOM fpureg                   ; D8 D0+r              [8086,FPU]
+     FCOM ST0,fpureg               ; D8 D0+r              [8086,FPU]
+
+     FCOMP mem32                   ; D8 /3                [8086,FPU]
+     FCOMP mem64                   ; DC /3                [8086,FPU]
+     FCOMP fpureg                  ; D8 D8+r              [8086,FPU]
+     FCOMP ST0,fpureg              ; D8 D8+r              [8086,FPU]
+
+     FCOMPP                        ; DE D9                [8086,FPU]
+
+     FCOMI fpureg                  ; DB F0+r              [P6,FPU]
+     FCOMI ST0,fpureg              ; DB F0+r              [P6,FPU]
+
+     FCOMIP fpureg                 ; DF F0+r              [P6,FPU]
+     FCOMIP ST0,fpureg             ; DF F0+r              [P6,FPU]
+
+   `FCOM' compares `ST0' with the given operand, and sets the FPU flags
+accordingly. `ST0' is treated as the left-hand side of the comparison,
+so that the carry flag is set (for a `less-than' result) if `ST0' is
+less than the given operand.
+
+   `FCOMP' does the same as `FCOM', but pops the register stack
+afterwards. `FCOMPP' compares `ST0' with `ST1' and then pops the
+register stack twice.
+
+   `FCOMI' and `FCOMIP' work like the corresponding forms of `FCOM' and
+`FCOMP', but write their results directly to the CPU flags register
+rather than the FPU status word, so they can be immediately followed by
+conditional jump or conditional move instructions.
+
+   The `FCOM' instructions differ from the `FUCOM' instructions (*Note
+Section A.69::) only in the way they handle quiet NaNs: `FUCOM' will
+handle them silently and set the condition code flags to an `unordered'
+result, whereas `FCOM' will generate an exception.
+
+
+File: nasm.info,  Node: Section A.36,  Next: Section A.37,  Prev: Section A.35,  Up: Appendix A
+
+A.36. `FCOS': Cosine
+********************
+
+     FCOS                          ; D9 FF                [386,FPU]
+
+   `FCOS' computes the cosine of `ST0' (in radians), and stores the
+result in `ST0'. See also `FSINCOS' (*Note Section A.61::).
+
+
+File: nasm.info,  Node: Section A.37,  Next: Section A.38,  Prev: Section A.36,  Up: Appendix A
+
+A.37. `FDECSTP': Decrement Floating-Point Stack Pointer
+*******************************************************
+
+     FDECSTP                       ; D9 F6                [8086,FPU]
+
+   `FDECSTP' decrements the `top' field in the floating-point status
+word. This has the effect of rotating the FPU register stack by one, as
+if the contents of `ST7' had been pushed on the stack. See also
+`FINCSTP' (*Note Section A.46::).
+
+
+File: nasm.info,  Node: Section A.38,  Next: Section A.39,  Prev: Section A.37,  Up: Appendix A
+
+A.38. `FxDISI', `FxENI': Disable and Enable Floating-Point Interrupts
+*********************************************************************
+
+     FDISI                         ; 9B DB E1             [8086,FPU]
+     FNDISI                        ; DB E1                [8086,FPU]
+
+     FENI                          ; 9B DB E0             [8086,FPU]
+     FNENI                         ; DB E0                [8086,FPU]
+
+   `FDISI' and `FENI' disable and enable floating-point interrupts.
+These instructions are only meaningful on original 8087 processors: the
+287 and above treat them as no-operation instructions.
+
+   `FNDISI' and `FNENI' do the same thing as `FDISI' and `FENI'
+respectively, but without waiting for the floating-point processor to
+finish what it was doing first.
+
+
+File: nasm.info,  Node: Section A.39,  Next: Section A.40,  Prev: Section A.38,  Up: Appendix A
+
+A.39. `FDIV', `FDIVP', `FDIVR', `FDIVRP': Floating-Point Division
+*****************************************************************
+
+     FDIV mem32                    ; D8 /6                [8086,FPU]
+     FDIV mem64                    ; DC /6                [8086,FPU]
+
+     FDIV fpureg                   ; D8 F0+r              [8086,FPU]
+     FDIV ST0,fpureg               ; D8 F0+r              [8086,FPU]
+
+     FDIV TO fpureg                ; DC F8+r              [8086,FPU]
+     FDIV fpureg,ST0               ; DC F8+r              [8086,FPU]
+
+     FDIVR mem32                   ; D8 /0                [8086,FPU]
+     FDIVR mem64                   ; DC /0                [8086,FPU]
+
+     FDIVR fpureg                  ; D8 F8+r              [8086,FPU]
+     FDIVR ST0,fpureg              ; D8 F8+r              [8086,FPU]
+
+     FDIVR TO fpureg               ; DC F0+r              [8086,FPU]
+     FDIVR fpureg,ST0              ; DC F0+r              [8086,FPU]
+
+     FDIVP fpureg                  ; DE F8+r              [8086,FPU]
+     FDIVP fpureg,ST0              ; DE F8+r              [8086,FPU]
+
+     FDIVRP fpureg                 ; DE F0+r              [8086,FPU]
+     FDIVRP fpureg,ST0             ; DE F0+r              [8086,FPU]
+
+   `FDIV' divides `ST0' by the given operand and stores the result back
+in `ST0', unless the `TO' qualifier is given, in which case it divides
+the given operand by `ST0' and stores the result in the operand.
+
+   `FDIVR' does the same thing, but does the division the other way up:
+so if `TO' is not given, it divides the given operand by `ST0' and
+stores the result in `ST0', whereas if `TO' is given it divides `ST0'
+by its operand and stores the result in the operand.
+
+   `FDIVP' operates like `FDIV TO', but pops the register stack once it
+has finished. `FDIVRP' operates like `FDIVR TO', but pops the register
+stack once it has finished.
+
+
+File: nasm.info,  Node: Section A.40,  Next: Section A.41,  Prev: Section A.39,  Up: Appendix A
+
+A.40. `FFREE': Flag Floating-Point Register as Unused
+*****************************************************
+
+     FFREE fpureg                  ; DD C0+r              [8086,FPU]
+
+   `FFREE' marks the given register as being empty.
+
+
+File: nasm.info,  Node: Section A.41,  Next: Section A.42,  Prev: Section A.40,  Up: Appendix A
+
+A.41. `FIADD': Floating-Point/Integer Addition
+**********************************************
+
+     FIADD mem16                   ; DE /0                [8086,FPU]
+     FIADD mem32                   ; DA /0                [8086,FPU]
+
+   `FIADD' adds the 16-bit or 32-bit integer stored in the given memory
+location to `ST0', storing the result in `ST0'.
+
+
+File: nasm.info,  Node: Section A.42,  Next: Section A.43,  Prev: Section A.41,  Up: Appendix A
+
+A.42. `FICOM', `FICOMP': Floating-Point/Integer Compare
+*******************************************************
+
+     FICOM mem16                   ; DE /2                [8086,FPU]
+     FICOM mem32                   ; DA /2                [8086,FPU]
+
+     FICOMP mem16                  ; DE /3                [8086,FPU]
+     FICOMP mem32                  ; DA /3                [8086,FPU]
+
+   `FICOM' compares `ST0' with the 16-bit or 32-bit integer stored in
+the given memory location, and sets the FPU flags accordingly.
+`FICOMP' does the same, but pops the register stack afterwards.
+
+
+File: nasm.info,  Node: Section A.43,  Next: Section A.44,  Prev: Section A.42,  Up: Appendix A
+
+A.43. `FIDIV', `FIDIVR': Floating-Point/Integer Division
+********************************************************
+
+     FIDIV mem16                   ; DE /6                [8086,FPU]
+     FIDIV mem32                   ; DA /6                [8086,FPU]
+
+     FIDIVR mem16                  ; DE /0                [8086,FPU]
+     FIDIVR mem32                  ; DA /0                [8086,FPU]
+
+   `FIDIV' divides `ST0' by the 16-bit or 32-bit integer stored in the
+given memory location, and stores the result in `ST0'.  `FIDIVR' does
+the division the other way up: it divides the integer by `ST0', but
+still stores the result in `ST0'.
+
+
+File: nasm.info,  Node: Section A.44,  Next: Section A.45,  Prev: Section A.43,  Up: Appendix A
+
+A.44. `FILD', `FIST', `FISTP': Floating-Point/Integer Conversion
+****************************************************************
+
+     FILD mem16                    ; DF /0                [8086,FPU]
+     FILD mem32                    ; DB /0                [8086,FPU]
+     FILD mem64                    ; DF /5                [8086,FPU]
+
+     FIST mem16                    ; DF /2                [8086,FPU]
+     FIST mem32                    ; DB /2                [8086,FPU]
+
+     FISTP mem16                   ; DF /3                [8086,FPU]
+     FISTP mem32                   ; DB /3                [8086,FPU]
+     FISTP mem64                   ; DF /0                [8086,FPU]
+
+   `FILD' loads an integer out of a memory location, converts it to a
+real, and pushes it on the FPU register stack. `FIST' converts `ST0' to
+an integer and stores that in memory; `FISTP' does the same as `FIST',
+but pops the register stack afterwards.
+
+
+File: nasm.info,  Node: Section A.45,  Next: Section A.46,  Prev: Section A.44,  Up: Appendix A
+
+A.45. `FIMUL': Floating-Point/Integer Multiplication
+****************************************************
+
+     FIMUL mem16                   ; DE /1                [8086,FPU]
+     FIMUL mem32                   ; DA /1                [8086,FPU]
+
+   `FIMUL' multiplies `ST0' by the 16-bit or 32-bit integer stored in
+the given memory location, and stores the result in `ST0'.
+
+
+File: nasm.info,  Node: Section A.46,  Next: Section A.47,  Prev: Section A.45,  Up: Appendix A
+
+A.46. `FINCSTP': Increment Floating-Point Stack Pointer
+*******************************************************
+
+     FINCSTP                       ; D9 F7                [8086,FPU]
+
+   `FINCSTP' increments the `top' field in the floating-point status
+word. This has the effect of rotating the FPU register stack by one, as
+if the register stack had been popped; however, unlike the popping of
+the stack performed by many FPU instructions, it does not flag the new
+`ST7' (previously `ST0') as empty. See also `FDECSTP' (*Note Section
+A.37::).
+
+
+File: nasm.info,  Node: Section A.47,  Next: Section A.48,  Prev: Section A.46,  Up: Appendix A
+
+A.47. `FINIT', `FNINIT': Initialise Floating-Point Unit
+*******************************************************
+
+     FINIT                         ; 9B DB E3             [8086,FPU]
+     FNINIT                        ; DB E3                [8086,FPU]
+
+   `FINIT' initialises the FPU to its default state. It flags all
+registers as empty, though it does not actually change their values.
+`FNINIT' does the same, without first waiting for pending exceptions to
+clear.
+
+
+File: nasm.info,  Node: Section A.48,  Next: Section A.49,  Prev: Section A.47,  Up: Appendix A
+
+A.48. `FISUB': Floating-Point/Integer Subtraction
+*************************************************
+
+     FISUB mem16                   ; DE /4                [8086,FPU]
+     FISUB mem32                   ; DA /4                [8086,FPU]
+
+     FISUBR mem16                  ; DE /5                [8086,FPU]
+     FISUBR mem32                  ; DA /5                [8086,FPU]
+
+   `FISUB' subtracts the 16-bit or 32-bit integer stored in the given
+memory location from `ST0', and stores the result in `ST0'.  `FISUBR'
+does the subtraction the other way round, i.e. it subtracts `ST0' from
+the given integer, but still stores the result in `ST0'.
+
+
+File: nasm.info,  Node: Section A.49,  Next: Section A.50,  Prev: Section A.48,  Up: Appendix A
+
+A.49. `FLD': Floating-Point Load
+********************************
+
+     FLD mem32                     ; D9 /0                [8086,FPU]
+     FLD mem64                     ; DD /0                [8086,FPU]
+     FLD mem80                     ; DB /5                [8086,FPU]
+     FLD fpureg                    ; D9 C0+r              [8086,FPU]
+
+   `FLD' loads a floating-point value out of the given register or
+memory location, and pushes it on the FPU register stack.
+
+
+File: nasm.info,  Node: Section A.50,  Next: Section A.51,  Prev: Section A.49,  Up: Appendix A
+
+A.50. `FLDxx': Floating-Point Load Constants
+********************************************
+
+     FLD1                          ; D9 E8                [8086,FPU]
+     FLDL2E                        ; D9 EA                [8086,FPU]
+     FLDL2T                        ; D9 E9                [8086,FPU]
+     FLDLG2                        ; D9 EC                [8086,FPU]
+     FLDLN2                        ; D9 ED                [8086,FPU]
+     FLDPI                         ; D9 EB                [8086,FPU]
+     FLDZ                          ; D9 EE                [8086,FPU]
+
+   These instructions push specific standard constants on the FPU
+register stack. `FLD1' pushes the value 1; `FLDL2E' pushes the base-2
+logarithm of e; `FLDL2T' pushes the base-2 log of 10; `FLDLG2' pushes
+the base-10 log of 2; `FLDLN2' pushes the base-e log of 2; `FLDPI'
+pushes pi; and `FLDZ' pushes zero.
+
+
+File: nasm.info,  Node: Section A.51,  Next: Section A.52,  Prev: Section A.50,  Up: Appendix A
+
+A.51. `FLDCW': Load Floating-Point Control Word
+***********************************************
+
+     FLDCW mem16                   ; D9 /5                [8086,FPU]
+
+   `FLDCW' loads a 16-bit value out of memory and stores it into the FPU
+control word (governing things like the rounding mode, the precision,
+and the exception masks). See also `FSTCW' (*Note Section A.64::).
+
+
+File: nasm.info,  Node: Section A.52,  Next: Section A.53,  Prev: Section A.51,  Up: Appendix A
+
+A.52. `FLDENV': Load Floating-Point Environment
+***********************************************
+
+     FLDENV mem                    ; D9 /4                [8086,FPU]
+
+   `FLDENV' loads the FPU operating environment (control word, status
+word, tag word, instruction pointer, data pointer and last opcode) from
+memory. The memory area is 14 or 28 bytes long, depending on the CPU
+mode at the time. See also `FSTENV' (*Note Section A.65::).
+
+
+File: nasm.info,  Node: Section A.53,  Next: Section A.54,  Prev: Section A.52,  Up: Appendix A
+
+A.53. `FMUL', `FMULP': Floating-Point Multiply
+**********************************************
+
+     FMUL mem32                    ; D8 /1                [8086,FPU]
+     FMUL mem64                    ; DC /1                [8086,FPU]
+
+     FMUL fpureg                   ; D8 C8+r              [8086,FPU]
+     FMUL ST0,fpureg               ; D8 C8+r              [8086,FPU]
+
+     FMUL TO fpureg                ; DC C8+r              [8086,FPU]
+     FMUL fpureg,ST0               ; DC C8+r              [8086,FPU]
+
+     FMULP fpureg                  ; DE C8+r              [8086,FPU]
+     FMULP fpureg,ST0              ; DE C8+r              [8086,FPU]
+
+   `FMUL' multiplies `ST0' by the given operand, and stores the result
+in `ST0', unless the `TO' qualifier is used in which case it stores the
+result in the operand. `FMULP' performs the same operation as `FMUL
+TO', and then pops the register stack.
+
+
+File: nasm.info,  Node: Section A.54,  Next: Section A.55,  Prev: Section A.53,  Up: Appendix A
+
+A.54. `FNOP': Floating-Point No Operation
+*****************************************
+
+     FNOP                          ; D9 D0                [8086,FPU]
+
+   `FNOP' does nothing.
+
+
+File: nasm.info,  Node: Section A.55,  Next: Section A.56,  Prev: Section A.54,  Up: Appendix A
+
+A.55. `FPATAN', `FPTAN': Arctangent and Tangent
+***********************************************
+
+     FPATAN                        ; D9 F3                [8086,FPU]
+     FPTAN                         ; D9 F2                [8086,FPU]
+
+   `FPATAN' computes the arctangent, in radians, of the result of
+dividing `ST1' by `ST0', stores the result in `ST1', and pops the
+register stack. It works like the C `atan2' function, in that changing
+the sign of both `ST0' and `ST1' changes the output value by pi (so it
+performs true rectangular-to-polar coordinate conversion, with `ST1'
+being the Y coordinate and `ST0' being the X coordinate, not merely an
+arctangent).
+
+   `FPTAN' computes the tangent of the value in `ST0' (in radians), and
+stores the result back into `ST0'.
+
+
+File: nasm.info,  Node: Section A.56,  Next: Section A.57,  Prev: Section A.55,  Up: Appendix A
+
+A.56. `FPREM', `FPREM1': Floating-Point Partial Remainder
+*********************************************************
+
+     FPREM                         ; D9 F8                [8086,FPU]
+     FPREM1                        ; D9 F5                [386,FPU]
+
+   These instructions both produce the remainder obtained by dividing
+`ST0' by `ST1'. This is calculated, notionally, by dividing `ST0' by
+`ST1', rounding the result to an integer, multiplying by `ST1' again,
+and computing the value which would need to be added back on to the
+result to get back to the original value in `ST0'.
+
+   The two instructions differ in the way the notional round-to-integer
+operation is performed. `FPREM' does it by rounding towards zero, so
+that the remainder it returns always has the same sign as the original
+value in `ST0'; `FPREM1' does it by rounding to the nearest integer, so
+that the remainder always has at most half the magnitude of `ST1'.
+
+   Both instructions calculate _partial_ remainders, meaning that they
+may not manage to provide the final result, but might leave intermediate
+results in `ST0' instead. If this happens, they will set the C2 flag in
+the FPU status word; therefore, to calculate a remainder, you should
+repeatedly execute `FPREM' or `FPREM1' until C2 becomes clear.
+
+
+File: nasm.info,  Node: Section A.57,  Next: Section A.58,  Prev: Section A.56,  Up: Appendix A
+
+A.57. `FRNDINT': Floating-Point Round to Integer
+************************************************
+
+     FRNDINT                       ; D9 FC                [8086,FPU]
+
+   `FRNDINT' rounds the contents of `ST0' to an integer, according to
+the current rounding mode set in the FPU control word, and stores the
+result back in `ST0'.
+
+
+File: nasm.info,  Node: Section A.58,  Next: Section A.59,  Prev: Section A.57,  Up: Appendix A
+
+A.58. `FSAVE', `FRSTOR': Save/Restore Floating-Point State
+**********************************************************
+
+     FSAVE mem                     ; 9B DD /6             [8086,FPU]
+     FNSAVE mem                    ; DD /6                [8086,FPU]
+
+     FRSTOR mem                    ; DD /4                [8086,FPU]
+
+   `FSAVE' saves the entire floating-point unit state, including all the
+information saved by `FSTENV' (*Note Section A.65::) plus the contents
+of all the registers, to a 94 or 108 byte area of memory (depending on
+the CPU mode). `FRSTOR' restores the floating-point state from the same
+area of memory.
+
+   `FNSAVE' does the same as `FSAVE', without first waiting for pending
+floating-point exceptions to clear.
+
+
+File: nasm.info,  Node: Section A.59,  Next: Section A.60,  Prev: Section A.58,  Up: Appendix A
+
+A.59. `FSCALE': Scale Floating-Point Value by Power of Two
+**********************************************************
+
+     FSCALE                        ; D9 FD                [8086,FPU]
+
+   `FSCALE' scales a number by a power of two: it rounds `ST1' towards
+zero to obtain an integer, then multiplies `ST0' by two to the power of
+that integer, and stores the result in `ST0'.
+
+
+File: nasm.info,  Node: Section A.60,  Next: Section A.61,  Prev: Section A.59,  Up: Appendix A
+
+A.60. `FSETPM': Set Protected Mode
+**********************************
+
+     FSETPM                        ; DB E4                [286,FPU]
+
+   This instruction initalises protected mode on the 287 floating-point
+coprocessor. It is only meaningful on that processor: the 387 and above
+treat the instruction as a no-operation.
+
+
+File: nasm.info,  Node: Section A.61,  Next: Section A.62,  Prev: Section A.60,  Up: Appendix A
+
+A.61. `FSIN', `FSINCOS': Sine and Cosine
+****************************************
+
+     FSIN                          ; D9 FE                [386,FPU]
+     FSINCOS                       ; D9 FB                [386,FPU]
+
+   `FSIN' calculates the sine of `ST0' (in radians) and stores the
+result in `ST0'. `FSINCOS' does the same, but then pushes the cosine of
+the same value on the register stack, so that the sine ends up in `ST1'
+and the cosine in `ST0'. `FSINCOS' is faster than executing `FSIN' and
+`FCOS' (see *Note Section A.36::) in succession.
+
+
+File: nasm.info,  Node: Section A.62,  Next: Section A.63,  Prev: Section A.61,  Up: Appendix A
+
+A.62. `FSQRT': Floating-Point Square Root
+*****************************************
+
+     FSQRT                         ; D9 FA                [8086,FPU]
+
+   `FSQRT' calculates the square root of `ST0' and stores the result in
+`ST0'.
+
+
+File: nasm.info,  Node: Section A.63,  Next: Section A.64,  Prev: Section A.62,  Up: Appendix A
+
+A.63. `FST', `FSTP': Floating-Point Store
+*****************************************
+
+     FST mem32                     ; D9 /2                [8086,FPU]
+     FST mem64                     ; DD /2                [8086,FPU]
+     FST fpureg                    ; DD D0+r              [8086,FPU]
+
+     FSTP mem32                    ; D9 /3                [8086,FPU]
+     FSTP mem64                    ; DD /3                [8086,FPU]
+     FSTP mem80                    ; DB /0                [8086,FPU]
+     FSTP fpureg                   ; DD D8+r              [8086,FPU]
+
+   `FST' stores the value in `ST0' into the given memory location or
+other FPU register. `FSTP' does the same, but then pops the register
+stack.
+
+
+File: nasm.info,  Node: Section A.64,  Next: Section A.65,  Prev: Section A.63,  Up: Appendix A
+
+A.64. `FSTCW': Store Floating-Point Control Word
+************************************************
+
+     FSTCW mem16                   ; 9B D9 /0             [8086,FPU]
+     FNSTCW mem16                  ; D9 /0                [8086,FPU]
+
+   `FSTCW' stores the FPU control word (governing things like the
+rounding mode, the precision, and the exception masks) into a 2-byte
+memory area. See also `FLDCW' (*Note Section A.51::).
+
+   `FNSTCW' does the same thing as `FSTCW', without first waiting for
+pending floating-point exceptions to clear.
+
+
+File: nasm.info,  Node: Section A.65,  Next: Section A.66,  Prev: Section A.64,  Up: Appendix A
+
+A.65. `FSTENV': Store Floating-Point Environment
+************************************************
+
+     FSTENV mem                    ; 9B D9 /6             [8086,FPU]
+     FNSTENV mem                   ; D9 /6                [8086,FPU]
+
+   `FSTENV' stores the FPU operating environment (control word, status
+word, tag word, instruction pointer, data pointer and last opcode) into
+memory. The memory area is 14 or 28 bytes long, depending on the CPU
+mode at the time. See also `FLDENV' (*Note Section A.52::).
+
+   `FNSTENV' does the same thing as `FSTENV', without first waiting for
+pending floating-point exceptions to clear.
+
+
+File: nasm.info,  Node: Section A.66,  Next: Section A.67,  Prev: Section A.65,  Up: Appendix A
+
+A.66. `FSTSW': Store Floating-Point Status Word
+***********************************************
+
+     FSTSW mem16                   ; 9B DD /0             [8086,FPU]
+     FSTSW AX                      ; 9B DF E0             [286,FPU]
+
+     FNSTSW mem16                  ; DD /0                [8086,FPU]
+     FNSTSW AX                     ; DF E0                [286,FPU]
+
+   `FSTSW' stores the FPU status word into `AX' or into a 2-byte memory
+area.
+
+   `FNSTSW' does the same thing as `FSTSW', without first waiting for
+pending floating-point exceptions to clear.
+
+
+File: nasm.info,  Node: Section A.67,  Next: Section A.68,  Prev: Section A.66,  Up: Appendix A
+
+A.67. `FSUB', `FSUBP', `FSUBR', `FSUBRP': Floating-Point Subtract
+*****************************************************************
+
+     FSUB mem32                    ; D8 /4                [8086,FPU]
+     FSUB mem64                    ; DC /4                [8086,FPU]
+
+     FSUB fpureg                   ; D8 E0+r              [8086,FPU]
+     FSUB ST0,fpureg               ; D8 E0+r              [8086,FPU]
+
+     FSUB TO fpureg                ; DC E8+r              [8086,FPU]
+     FSUB fpureg,ST0               ; DC E8+r              [8086,FPU]
+
+     FSUBR mem32                   ; D8 /5                [8086,FPU]
+     FSUBR mem64                   ; DC /5                [8086,FPU]
+
+     FSUBR fpureg                  ; D8 E8+r              [8086,FPU]
+     FSUBR ST0,fpureg              ; D8 E8+r              [8086,FPU]
+
+     FSUBR TO fpureg               ; DC E0+r              [8086,FPU]
+     FSUBR fpureg,ST0              ; DC E0+r              [8086,FPU]
+
+     FSUBP fpureg                  ; DE E8+r              [8086,FPU]
+     FSUBP fpureg,ST0              ; DE E8+r              [8086,FPU]
+
+     FSUBRP fpureg                 ; DE E0+r              [8086,FPU]
+     FSUBRP fpureg,ST0             ; DE E0+r              [8086,FPU]
+
+   `FSUB' subtracts the given operand from `ST0' and stores the result
+back in `ST0', unless the `TO' qualifier is given, in which case it
+subtracts `ST0' from the given operand and stores the result in the
+operand.
+
+   `FSUBR' does the same thing, but does the subtraction the other way
+up: so if `TO' is not given, it subtracts `ST0' from the given operand
+and stores the result in `ST0', whereas if `TO' is given it subtracts
+its operand from `ST0' and stores the result in the operand.
+
+   `FSUBP' operates like `FSUB TO', but pops the register stack once it
+has finished. `FSUBRP' operates like `FSUBR TO', but pops the register
+stack once it has finished.
+
+
+File: nasm.info,  Node: Section A.68,  Next: Section A.69,  Prev: Section A.67,  Up: Appendix A
+
+A.68. `FTST': Test `ST0' Against Zero
+*************************************
+
+     FTST                          ; D9 E4                [8086,FPU]
+
+   `FTST' compares `ST0' with zero and sets the FPU flags accordingly.
+`ST0' is treated as the left-hand side of the comparison, so that a
+`less-than' result is generated if `ST0' is negative.
+
+
+File: nasm.info,  Node: Section A.69,  Next: Section A.70,  Prev: Section A.68,  Up: Appendix A
+
+A.69. `FUCOMxx': Floating-Point Unordered Compare
+*************************************************
+
+     FUCOM fpureg                  ; DD E0+r              [386,FPU]
+     FUCOM ST0,fpureg              ; DD E0+r              [386,FPU]
+
+     FUCOMP fpureg                 ; DD E8+r              [386,FPU]
+     FUCOMP ST0,fpureg             ; DD E8+r              [386,FPU]
+
+     FUCOMPP                       ; DA E9                [386,FPU]
+
+     FUCOMI fpureg                 ; DB E8+r              [P6,FPU]
+     FUCOMI ST0,fpureg             ; DB E8+r              [P6,FPU]
+
+     FUCOMIP fpureg                ; DF E8+r              [P6,FPU]
+     FUCOMIP ST0,fpureg            ; DF E8+r              [P6,FPU]
+
+   `FUCOM' compares `ST0' with the given operand, and sets the FPU
+flags accordingly. `ST0' is treated as the left-hand side of the
+comparison, so that the carry flag is set (for a `less-than' result) if
+`ST0' is less than the given operand.
+
+   `FUCOMP' does the same as `FUCOM', but pops the register stack
+afterwards. `FUCOMPP' compares `ST0' with `ST1' and then pops the
+register stack twice.
+
+   `FUCOMI' and `FUCOMIP' work like the corresponding forms of `FUCOM'
+and `FUCOMP', but write their results directly to the CPU flags
+register rather than the FPU status word, so they can be immediately
+followed by conditional jump or conditional move instructions.
+
+   The `FUCOM' instructions differ from the `FCOM' instructions (*Note
+Section A.35::) only in the way they handle quiet NaNs: `FUCOM' will
+handle them silently and set the condition code flags to an `unordered'
+result, whereas `FCOM' will generate an exception.
+
+
+File: nasm.info,  Node: Section A.70,  Next: Section A.71,  Prev: Section A.69,  Up: Appendix A
+
+A.70. `FXAM': Examine Class of Value in `ST0'
+*********************************************
+
+     FXAM                          ; D9 E5                [8086,FPU]
+
+   `FXAM' sets the FPU flags C3, C2 and C0 depending on the type of
+value stored in `ST0': 000 (respectively) for an unsupported format,
+001 for a NaN, 010 for a normal finite number, 011 for an infinity, 100
+for a zero, 101 for an empty register, and 110 for a denormal. It also
+sets the C1 flag to the sign of the number.
+
+
+File: nasm.info,  Node: Section A.71,  Next: Section A.72,  Prev: Section A.70,  Up: Appendix A
+
+A.71. `FXCH': Floating-Point Exchange
+*************************************
+
+     FXCH                          ; D9 C9                [8086,FPU]
+     FXCH fpureg                   ; D9 C8+r              [8086,FPU]
+     FXCH fpureg,ST0               ; D9 C8+r              [8086,FPU]
+     FXCH ST0,fpureg               ; D9 C8+r              [8086,FPU]
+
+   `FXCH' exchanges `ST0' with a given FPU register. The no-operand
+form exchanges `ST0' with `ST1'.
+
+
+File: nasm.info,  Node: Section A.72,  Next: Section A.73,  Prev: Section A.71,  Up: Appendix A
+
+A.72. `FXTRACT': Extract Exponent and Significand
+*************************************************
+
+     FXTRACT                       ; D9 F4                [8086,FPU]
+
+   `FXTRACT' separates the number in `ST0' into its exponent and
+significand (mantissa), stores the exponent back into `ST0', and then
+pushes the significand on the register stack (so that the significand
+ends up in `ST0', and the exponent in `ST1').
+
+
+File: nasm.info,  Node: Section A.73,  Next: Section A.74,  Prev: Section A.72,  Up: Appendix A
+
+A.73. `FYL2X', `FYL2XP1': Compute Y times Log2(X) or Log2(X+1)
+**************************************************************
+
+     FYL2X                         ; D9 F1                [8086,FPU]
+     FYL2XP1                       ; D9 F9                [8086,FPU]
+
+   `FYL2X' multiplies `ST1' by the base-2 logarithm of `ST0', stores
+the result in `ST1', and pops the register stack (so that the result
+ends up in `ST0'). `ST0' must be non-zero and positive.
+
+   `FYL2XP1' works the same way, but replacing the base-2 log of `ST0'
+with that of `ST0' plus one. This time, `ST0' must have magnitude no
+greater than 1 minus half the square root of two.
+
+
+File: nasm.info,  Node: Section A.74,  Next: Section A.75,  Prev: Section A.73,  Up: Appendix A
+
+A.74. `HLT': Halt Processor
+***************************
+
+     HLT                           ; F4                   [8086]
+
+   `HLT' puts the processor into a halted state, where it will perform
+no more operations until restarted by an interrupt or a reset.
+
+
+File: nasm.info,  Node: Section A.75,  Next: Section A.76,  Prev: Section A.74,  Up: Appendix A
+
+A.75. `IBTS': Insert Bit String
+*******************************
+
+     IBTS r/m16,reg16              ; o16 0F A7 /r         [386,UNDOC]
+     IBTS r/m32,reg32              ; o32 0F A7 /r         [386,UNDOC]
+
+   No clear documentation seems to be available for this instruction:
+the best I've been able to find reads `Takes a string of bits from the
+second operand and puts them in the first operand'. It is present only
+in early 386 processors, and conflicts with the opcodes for
+`CMPXCHG486'. NASM supports it only for completeness. Its counterpart
+is `XBTS' (see *Note Section A.167::).
+
+
+File: nasm.info,  Node: Section A.76,  Next: Section A.77,  Prev: Section A.75,  Up: Appendix A
+
+A.76. `IDIV': Signed Integer Divide
+***********************************
+
+     IDIV r/m8                     ; F6 /7                [8086]
+     IDIV r/m16                    ; o16 F7 /7            [8086]
+     IDIV r/m32                    ; o32 F7 /7            [386]
+
+   `IDIV' performs signed integer division. The explicit operand
+provided is the divisor; the dividend and destination operands are
+implicit, in the following way:
+
+   * For `IDIV r/m8', `AX' is divided by the given operand; the
+     quotient is stored in `AL' and the remainder in `AH'.
+
+   * For `IDIV r/m16', `DX:AX' is divided by the given operand; the
+     quotient is stored in `AX' and the remainder in `DX'.
+
+   * For `IDIV r/m32', `EDX:EAX' is divided by the given operand; the
+     quotient is stored in `EAX' and the remainder in `EDX'.
+
+   Unsigned integer division is performed by the `DIV' instruction: see
+*Note Section A.25::.
+
+
+File: nasm.info,  Node: Section A.77,  Next: Section A.78,  Prev: Section A.76,  Up: Appendix A
+
+A.77. `IMUL': Signed Integer Multiply
+*************************************
+
+     IMUL r/m8                     ; F6 /5                [8086]
+     IMUL r/m16                    ; o16 F7 /5            [8086]
+     IMUL r/m32                    ; o32 F7 /5            [386]
+
+     IMUL reg16,r/m16              ; o16 0F AF /r         [386]
+     IMUL reg32,r/m32              ; o32 0F AF /r         [386]
+
+     IMUL reg16,imm8               ; o16 6B /r ib         [286]
+     IMUL reg16,imm16              ; o16 69 /r iw         [286]
+     IMUL reg32,imm8               ; o32 6B /r ib         [386]
+     IMUL reg32,imm32              ; o32 69 /r id         [386]
+
+     IMUL reg16,r/m16,imm8         ; o16 6B /r ib         [286]
+     IMUL reg16,r/m16,imm16        ; o16 69 /r iw         [286]
+     IMUL reg32,r/m32,imm8         ; o32 6B /r ib         [386]
+     IMUL reg32,r/m32,imm32        ; o32 69 /r id         [386]
+
+   `IMUL' performs signed integer multiplication. For the single-operand
+form, the other operand and destination are implicit, in the following
+way:
+
+   * For `IMUL r/m8', `AL' is multiplied by the given operand; the
+     product is stored in `AX'.
+
+   * For `IMUL r/m16', `AX' is multiplied by the given operand; the
+     product is stored in `DX:AX'.
+
+   * For `IMUL r/m32', `EAX' is multiplied by the given operand; the
+     product is stored in `EDX:EAX'.
+
+   The two-operand form multiplies its two operands and stores the
+result in the destination (first) operand. The three-operand form
+multiplies its last two operands and stores the result in the first
+operand.
+
+   The two-operand form is in fact a shorthand for the three-operand
+form, as can be seen by examining the opcode descriptions: in the
+two-operand form, the code `/r' takes both its register and `r/m' parts
+from the same operand (the first one).
+
+   In the forms with an 8-bit immediate operand and another longer
+source operand, the immediate operand is considered to be signed, and
+is sign- extended to the length of the other source operand. In these
+cases, the `BYTE' qualifier is necessary to force NASM to generate this
+form of the instruction.
+
+   Unsigned integer multiplication is performed by the `MUL'
+instruction: see *Note Section A.107::.
+
+
+File: nasm.info,  Node: Section A.78,  Next: Section A.79,  Prev: Section A.77,  Up: Appendix A
+
+A.78. `IN': Input from I/O Port
+*******************************
+
+     IN AL,imm8                    ; E4 ib                [8086]
+     IN AX,imm8                    ; o16 E5 ib            [8086]
+     IN EAX,imm8                   ; o32 E5 ib            [386]
+     IN AL,DX                      ; EC                   [8086]
+     IN AX,DX                      ; o16 ED               [8086]
+     IN EAX,DX                     ; o32 ED               [386]
+
+   `IN' reads a byte, word or doubleword from the specified I/O port,
+and stores it in the given destination register. The port number may be
+specified as an immediate value if it is between 0 and 255, and
+otherwise must be stored in `DX'. See also `OUT' (*Note Section
+A.111::).
+
+
+File: nasm.info,  Node: Section A.79,  Next: Section A.80,  Prev: Section A.78,  Up: Appendix A
+
+A.79. `INC': Increment Integer
+******************************
+
+     INC reg16                     ; o16 40+r             [8086]
+     INC reg32                     ; o32 40+r             [386]
+     INC r/m8                      ; FE /0                [8086]
+     INC r/m16                     ; o16 FF /0            [8086]
+     INC r/m32                     ; o32 FF /0            [386]
+
+   `INC' adds 1 to its operand. It does _not_ affect the carry flag: to
+affect the carry flag, use `ADD something,1' (see *Note Section A.6::).
+See also `DEC' (*Note Section A.24::).
+

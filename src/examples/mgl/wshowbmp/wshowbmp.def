@@ -1,0 +1,5 @@
+NAME    	WSHOWBMP
+DESCRIPTION 'MGL Windowed Bitmap Loading Demo'
+CODE    	PRELOAD
+DATA    	PRELOAD MULTIPLE
+

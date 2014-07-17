@@ -1,0 +1,1127 @@
+This is nasm.info, produced by Makeinfo version 3.12f from nasmdoc.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* NASM: (nasm).                The Netwide Assembler for x86.
+END-INFO-DIR-ENTRY
+
+
+   This file documents NASM, the Netwide Assembler: an assembler
+targetting the Intel x86 series of processors, with portable source.
+
+   Copyright 1997 Simon Tatham
+
+   All rights reserved. This document is redistributable under the
+licence given in the file "Licence" distributed in the NASM archive.
+
+
+File: nasm.info,  Node: Section 6.5.1,  Next: Section 6.5.2,  Prev: Section 6.5,  Up: Section 6.5
+
+6.5.1. `elf' Extensions to the `SECTION' Directive
+**************************************************
+
+   Like the `obj' format, `elf' allows you to specify additional
+information on the `SECTION' directive line, to control the type and
+properties of sections you declare. Section types and properties are
+generated automatically by NASM for the standard section names `.text',
+`.data' and `.bss', but may still be overridden by these qualifiers.
+
+   The available qualifiers are:
+
+   * `alloc' defines the section to be one which is loaded into memory
+     when the program is run. `noalloc' defines it to be one which is
+     not, such as an informational or comment section.
+
+   * `exec' defines the section to be one which should have execute
+     permission when the program is run. `noexec' defines it as one
+     which should not.
+
+   * `write' defines the section to be one which should be writable when
+     the program is run. `nowrite' defines it as one which should not.
+
+   * `progbits' defines the section to be one with explicit contents
+     stored in the object file: an ordinary code or data section, for
+     example, `nobits' defines the section to be one with no explicit
+     contents given, such as a BSS section.
+
+   * `align=', used with a trailing number as in `obj', gives the
+     alignment requirements of the section.
+
+   The defaults assumed by NASM if you do not specify the above
+qualifiers are:
+
+               section .text progbits alloc   exec nowrite align=16
+               section .data progbits alloc noexec   write align=4
+               section .bss    nobits alloc noexec   write align=4
+               section other progbits alloc noexec nowrite align=1
+
+   (Any section name other than `.text', `.data' and `.bss' is treated
+by default like `other' in the above code.)
+
+
+File: nasm.info,  Node: Section 6.5.2,  Next: Section 6.5.3,  Prev: Section 6.5.1,  Up: Section 6.5
+
+6.5.2. Position-Independent Code: `elf' Special Symbols and `WRT'
+*****************************************************************
+
+   The ELF specification contains enough features to allow position-
+independent code (PIC) to be written, which makes ELF shared libraries
+very flexible. However, it also means NASM has to be able to generate a
+variety of strange relocation types in ELF object files, if it is to be
+an assembler which can write PIC.
+
+   Since ELF does not support segment-base references, the `WRT'
+operator is not used for its normal purpose; therefore NASM's `elf'
+output format makes use of `WRT' for a different purpose, namely the
+PIC- specific relocation types.
+
+   `elf' defines five special symbols which you can use as the
+right-hand side of the `WRT' operator to obtain PIC relocation types.
+They are `..gotpc', `..gotoff', `..got', `..plt' and `..sym'. Their
+functions are summarised here:
+
+   * Referring to the symbol marking the global offset table base using
+     `wrt ..gotpc' will end up giving the distance from the beginning of
+     the current section to the global offset table.
+     (`_GLOBAL_OFFSET_TABLE_' is the standard symbol name used to refer
+     to the GOT.) So you would then need to add `$$' to the result to
+     get the real address of the GOT.
+
+   * Referring to a location in one of your own sections using `wrt
+     ..gotoff' will give the distance from the beginning of the GOT to
+     the specified location, so that adding on the address of the GOT
+     would give the real address of the location you wanted.
+
+   * Referring to an external or global symbol using `wrt ..got' causes
+     the linker to build an entry _in_ the GOT containing the address
+     of the symbol, and the reference gives the distance from the
+     beginning of the GOT to the entry; so you can add on the address
+     of the GOT, load from the resulting address, and end up with the
+     address of the symbol.
+
+   * Referring to a procedure name using `wrt ..plt' causes the linker
+     to build a procedure linkage table entry for the symbol, and the
+     reference gives the address of the PLT entry. You can only use
+     this in contexts which would generate a PC-relative relocation
+     normally (i.e. as the destination for `CALL' or `JMP'), since ELF
+     contains no relocation type to refer to PLT entries absolutely.
+
+   * Referring to a symbol name using `wrt ..sym' causes NASM to write
+     an ordinary relocation, but instead of making the relocation
+     relative to the start of the section and then adding on the offset
+     to the symbol, it will write a relocation record aimed directly at
+     the symbol in question. The distinction is a necessary one due to
+     a peculiarity of the dynamic linker.
+
+   A fuller explanation of how to use these relocation types to write
+shared libraries entirely in NASM is given in *Note Section 8.2::.
+
+
+File: nasm.info,  Node: Section 6.5.3,  Next: Section 6.5.4,  Prev: Section 6.5.2,  Up: Section 6.5
+
+6.5.3. `elf' Extensions to the `GLOBAL' Directive
+*************************************************
+
+   ELF object files can contain more information about a global symbol
+than just its address: they can contain the size of the symbol and its
+type as well. These are not merely debugger conveniences, but are
+actually necessary when the program being written is a shared library.
+NASM therefore supports some extensions to the `GLOBAL' directive,
+allowing you to specify these features.
+
+   You can specify whether a global variable is a function or a data
+object by suffixing the name with a colon and the word `function' or
+`data'. (`object' is a synonym for `data'.) For example:
+
+               global hashlookup:function, hashtable:data
+
+   exports the global symbol `hashlookup' as a function and `hashtable'
+as a data object.
+
+   You can also specify the size of the data associated with the
+symbol, as a numeric expression (which may involve labels, and even
+forward references) after the type specifier. Like this:
+
+               global hashtable:data (hashtable.end - hashtable)
+     hashtable:
+               db this,that,theother  ; some data here
+     .end:
+
+   This makes NASM automatically calculate the length of the table and
+place that information into the ELF symbol table.
+
+   Declaring the type and size of global symbols is necessary when
+writing shared library code. For more information, see *Note Section
+8.2.4::.
+
+
+File: nasm.info,  Node: Section 6.5.4,  Next: Section 6.6,  Prev: Section 6.5.3,  Up: Section 6.5
+
+6.5.4. `elf' Extensions to the `COMMON' Directive
+*************************************************
+
+   ELF also allows you to specify alignment requirements on common
+variables.  This is done by putting a number (which must be a power of
+two) after the name and size of the common variable, separated (as
+usual) by a colon. For example, an array of doublewords would benefit
+from 4-byte alignment:
+
+               common dwordarray 128:4
+
+   This declares the total size of the array to be 128 bytes, and
+requires that it be aligned on a 4-byte boundary.
+
+
+File: nasm.info,  Node: Section 6.6,  Next: Section 6.7,  Prev: Section 6.5.4,  Up: Chapter 6
+
+6.6. `aout': Linux `a.out' Object Files
+***************************************
+
+   The `aout' format generates `a.out' object files, in the form used
+by early Linux systems. (These differ from other `a.out' object files
+in that the magic number in the first four bytes of the file is
+different. Also, some implementations of `a.out', for example NetBSD's,
+support position-independent code, which Linux's implementation
+doesn't.)
+
+   `a.out' provides a default output file-name extension of `.o'.
+
+   `a.out' is a very simple object format. It supports no special
+directives, no special symbols, no use of `SEG' or `WRT', and no
+extensions to any standard directives. It supports only the three
+standard section names `.text', `.data' and `.bss'.
+
+
+File: nasm.info,  Node: Section 6.7,  Next: Section 6.8,  Prev: Section 6.6,  Up: Chapter 6
+
+6.7. `aoutb': NetBSD/FreeBSD/OpenBSD `a.out' Object Files
+*********************************************************
+
+   The `aoutb' format generates `a.out' object files, in the form used
+by the various free BSD Unix clones, NetBSD, FreeBSD and OpenBSD. For
+simple object files, this object format is exactly the same as `aout'
+except for the magic number in the first four bytes of the file.
+However, the `aoutb' format supports position-independent code in the
+same way as the `elf' format, so you can use it to write BSD shared
+libraries.
+
+   `aoutb' provides a default output file-name extension of `.o'.
+
+   `aoutb' supports no special directives, no special symbols, and only
+the three standard section names `.text', `.data' and `.bss'. However,
+it also supports the same use of `WRT' as `elf' does, to provide
+position-independent code relocation types. See *Note Section 6.5.2::
+for full documentation of this feature.
+
+   `aoutb' also supports the same extensions to the `GLOBAL' directive
+as `elf' does: see *Note Section 6.5.3:: for documentation of this.
+
+
+File: nasm.info,  Node: Section 6.8,  Next: Section 6.9,  Prev: Section 6.7,  Up: Chapter 6
+
+6.8. `as86': Linux `as86' Object Files
+**************************************
+
+   The Linux 16-bit assembler `as86' has its own non-standard object
+file format. Although its companion linker `ld86' produces something
+close to ordinary `a.out' binaries as output, the object file format
+used to communicate between `as86' and `ld86' is not itself `a.out'.
+
+   NASM supports this format, just in case it is useful, as `as86'.
+`as86' provides a default output file-name extension of `.o'.
+
+   `as86' is a very simple object format (from the NASM user's point of
+view). It supports no special directives, no special symbols, no use of
+`SEG' or `WRT', and no extensions to any standard directives. It
+supports only the three standard section names `.text', `.data' and
+`.bss'.
+
+
+File: nasm.info,  Node: Section 6.9,  Next: Section 6.9.1,  Prev: Section 6.8,  Up: Chapter 6
+
+6.9. `rdf': Relocatable Dynamic Object File Format
+**************************************************
+
+   The `rdf' output format produces RDOFF object files. RDOFF
+(Relocatable Dynamic Object File Format) is a home-grown object-file
+format, designed alongside NASM itself and reflecting in its file format
+the internal structure of the assembler.
+
+   RDOFF is not used by any well-known operating systems. Those writing
+their own systems, however, may well wish to use RDOFF as their object
+format, on the grounds that it is designed primarily for simplicity and
+contains very little file-header bureaucracy.
+
+   The Unix NASM archive, and the DOS archive which includes sources,
+both contain an `rdoff' subdirectory holding a set of RDOFF utilities:
+an RDF linker, an RDF static-library manager, an RDF file dump utility,
+and a program which will load and execute an RDF executable under Linux.
+
+   `rdf' supports only the standard section names `.text', `.data' and
+`.bss'.
+
+* Menu:
+
+* Section 6.9.1:: Requiring a Library: The `LIBRARY' Directive
+
+
+File: nasm.info,  Node: Section 6.9.1,  Next: Section 6.10,  Prev: Section 6.9,  Up: Section 6.9
+
+6.9.1. Requiring a Library: The `LIBRARY' Directive
+***************************************************
+
+   RDOFF contains a mechanism for an object file to demand a given
+library to be linked to the module, either at load time or run time.
+This is done by the `LIBRARY' directive, which takes one argument which
+is the name of the module:
+
+               library mylib.rdl
+
+
+File: nasm.info,  Node: Section 6.10,  Next: Chapter 7,  Prev: Section 6.9.1,  Up: Chapter 6
+
+6.10. `dbg': Debugging Format
+*****************************
+
+   The `dbg' output format is not built into NASM in the default
+configuration. If you are building your own NASM executable from the
+sources, you can define `OF_DBG' in `outform.h' or on the compiler
+command line, and obtain the `dbg' output format.
+
+   The `dbg' format does not output an object file as such; instead, it
+outputs a text file which contains a complete list of all the
+transactions between the main body of NASM and the output-format back
+end module. It is primarily intended to aid people who want to write
+their own output drivers, so that they can get a clearer idea of the
+various requests the main program makes of the output driver, and in
+what order they happen.
+
+   For simple files, one can easily use the `dbg' format like this:
+
+     nasm -f dbg filename.asm
+
+   which will generate a diagnostic file called `filename.dbg'. However,
+this will not work well on files which were designed for a different
+object format, because each object format defines its own macros
+(usually user- level forms of directives), and those macros will not be
+defined in the `dbg' format. Therefore it can be useful to run NASM
+twice, in order to do the preprocessing with the native object format
+selected:
+
+     nasm -e -f rdf -o rdfprog.i rdfprog.asm
+     nasm -a -f dbg rdfprog.i
+
+   This preprocesses `rdfprog.asm' into `rdfprog.i', keeping the `rdf'
+object format selected in order to make sure RDF special directives are
+converted into primitive form correctly. Then the preprocessed source
+is fed through the `dbg' format to generate the final diagnostic output.
+
+   This workaround will still typically not work for programs intended
+for `obj' format, because the `obj' `SEGMENT' and `GROUP' directives
+have side effects of defining the segment and group names as symbols;
+`dbg' will not do this, so the program will not assemble. You will have
+to work around that by defining the symbols yourself (using `EXTERN',
+for example) if you really need to get a `dbg' trace of an
+`obj'-specific source file.
+
+   `dbg' accepts any section name and any directives at all, and logs
+them all to its output file.
+
+
+File: nasm.info,  Node: Chapter 7,  Next: Section 7.1,  Prev: Section 6.10,  Up: Top
+
+Chapter 7: Writing 16-bit Code (DOS, Windows 3/3.1)
+***************************************************
+
+   This chapter attempts to cover some of the common issues encountered
+when writing 16-bit code to run under MS-DOS or Windows 3.x. It covers
+how to link programs to produce `.EXE' or `.COM' files, how to write
+`.SYS' device drivers, and how to interface assembly language code with
+16-bit C compilers and with Borland Pascal.
+
+* Menu:
+
+* Section 7.1:: Producing `.EXE' Files
+* Section 7.2:: Producing `.COM' Files
+* Section 7.3:: Producing `.SYS' Files
+* Section 7.4:: Interfacing to 16-bit C Programs
+* Section 7.5:: Interfacing to Borland Pascal Programs
+
+
+File: nasm.info,  Node: Section 7.1,  Next: Section 7.1.1,  Prev: Chapter 7,  Up: Chapter 7
+
+7.1. Producing `.EXE' Files
+***************************
+
+   Any large program written under DOS needs to be built as a `.EXE'
+file: only `.EXE' files have the necessary internal structure required
+to span more than one 64K segment. Windows programs, also, have to be
+built as `.EXE' files, since Windows does not support the `.COM' format.
+
+   In general, you generate `.EXE' files by using the `obj' output
+format to produce one or more `.OBJ' files, and then linking them
+together using a linker. However, NASM also supports the direct
+generation of simple DOS `.EXE' files using the `bin' output format (by
+using `DB' and `DW' to construct the `.EXE' file header), and a macro
+package is supplied to do this. Thanks to Yann Guidon for contributing
+the code for this.
+
+   NASM may also support `.EXE' natively as another output format in
+future releases.
+
+* Menu:
+
+* Section 7.1.1:: Using the `obj' Format To Generate `.EXE' Files
+* Section 7.1.2:: Using the `bin' Format To Generate `.EXE' Files
+
+
+File: nasm.info,  Node: Section 7.1.1,  Next: Section 7.1.2,  Prev: Section 7.1,  Up: Section 7.1
+
+7.1.1. Using the `obj' Format To Generate `.EXE' Files
+******************************************************
+
+   This section describes the usual method of generating `.EXE' files by
+linking `.OBJ' files together.
+
+   Most 16-bit programming language packages come with a suitable
+linker; if you have none of these, there is a free linker called VAL,
+available in `LZH' archive format from `x2ftp.oulu.fi'. An LZH archiver
+can be found at `ftp.simtel.net'. There is another `free' linker
+(though this one doesn't come with sources) called FREELINK, available
+from `www.pcorner.com'. A third, `djlink', written by DJ Delorie, is
+available at `www.delorie.com'.
+
+   When linking several `.OBJ' files into a `.EXE' file, you should
+ensure that exactly one of them has a start point defined (using the
+`..start' special symbol defined by the `obj' format: see *Note Section
+6.2.6::). If no module defines a start point, the linker will not know
+what value to give the entry-point field in the output file header; if
+more than one defines a start point, the linker will not know _which_
+value to use.
+
+   An example of a NASM source file which can be assembled to a `.OBJ'
+file and linked on its own to a `.EXE' is given here. It demonstrates
+the basic principles of defining a stack, initialising the segment
+registers, and declaring a start point. This file is also provided in
+the `test' subdirectory of the NASM archives, under the name
+`objexe.asm'.
+
+               segment code
+     
+     ..start:  mov ax,data
+               mov ds,ax
+               mov ax,stack
+               mov ss,ax
+               mov sp,stacktop
+
+   This initial piece of code sets up `DS' to point to the data segment,
+and initialises `SS' and `SP' to point to the top of the provided
+stack. Notice that interrupts are implicitly disabled for one
+instruction after a move into `SS', precisely for this situation, so
+that there's no chance of an interrupt occurring between the loads of
+`SS' and `SP' and not having a stack to execute on.
+
+   Note also that the special symbol `..start' is defined at the
+beginning of this code, which means that will be the entry point into
+the resulting executable file.
+
+               mov dx,hello
+               mov ah,9
+               int 0x21
+
+   The above is the main program: load `DS:DX' with a pointer to the
+greeting message (`hello' is implicitly relative to the segment `data',
+which was loaded into `DS' in the setup code, so the full pointer is
+valid), and call the DOS print-string function.
+
+               mov ax,0x4c00
+               int 0x21
+
+   This terminates the program using another DOS system call.
+
+               segment data
+     hello:    db 'hello, world', 13, 10, '$'
+
+   The data segment contains the string we want to display.
+
+               segment stack stack
+               resb 64
+     stacktop:
+
+   The above code declares a stack segment containing 64 bytes of
+uninitialised stack space, and points `stacktop' at the top of it. The
+directive `segment stack stack' defines a segment _called_ `stack', and
+also of _type_ `STACK'. The latter is not necessary to the correct
+running of the program, but linkers are likely to issue warnings or
+errors if your program has no segment of type `STACK'.
+
+   The above file, when assembled into a `.OBJ' file, will link on its
+own to a valid `.EXE' file, which when run will print `hello, world'
+and then exit.
+
+
+File: nasm.info,  Node: Section 7.1.2,  Next: Section 7.2,  Prev: Section 7.1.1,  Up: Section 7.1
+
+7.1.2. Using the `bin' Format To Generate `.EXE' Files
+******************************************************
+
+   The `.EXE' file format is simple enough that it's possible to build a
+`.EXE' file by writing a pure-binary program and sticking a 32-byte
+header on the front. This header is simple enough that it can be
+generated using `DB' and `DW' commands by NASM itself, so that you can
+use the `bin' output format to directly generate `.EXE' files.
+
+   Included in the NASM archives, in the `misc' subdirectory, is a file
+`exebin.mac' of macros. It defines three macros: `EXE_begin',
+`EXE_stack' and `EXE_end'.
+
+   To produce a `.EXE' file using this method, you should start by using
+`%include' to load the `exebin.mac' macro package into your source
+file. You should then issue the `EXE_begin' macro call (which takes no
+arguments) to generate the file header data. Then write code as normal
+for the `bin' format - you can use all three standard sections `.text',
+`.data' and `.bss'. At the end of the file you should call the
+`EXE_end' macro (again, no arguments), which defines some symbols to
+mark section sizes, and these symbols are referred to in the header
+code generated by `EXE_begin'.
+
+   In this model, the code you end up writing starts at `0x100', just
+like a `.COM' file - in fact, if you strip off the 32-byte header from
+the resulting `.EXE' file, you will have a valid `.COM' program. All
+the segment bases are the same, so you are limited to a 64K program,
+again just like a `.COM' file. Note that an `ORG' directive is issued
+by the `EXE_begin' macro, so you should not explicitly issue one of
+your own.
+
+   You can't directly refer to your segment base value, unfortunately,
+since this would require a relocation in the header, and things would
+get a lot more complicated. So you should get your segment base by
+copying it out of `CS' instead.
+
+   On entry to your `.EXE' file, `SS:SP' are already set up to point to
+the top of a 2Kb stack. You can adjust the default stack size of 2Kb by
+calling the `EXE_stack' macro. For example, to change the stack size of
+your program to 64 bytes, you would call `EXE_stack 64'.
+
+   A sample program which generates a `.EXE' file in this way is given
+in the `test' subdirectory of the NASM archive, as `binexe.asm'.
+
+
+File: nasm.info,  Node: Section 7.2,  Next: Section 7.2.1,  Prev: Section 7.1.2,  Up: Chapter 7
+
+7.2. Producing `.COM' Files
+***************************
+
+   While large DOS programs must be written as `.EXE' files, small ones
+are often better written as `.COM' files. `.COM' files are pure binary,
+and therefore most easily produced using the `bin' output format.
+
+* Menu:
+
+* Section 7.2.1:: Using the `bin' Format To Generate `.COM' Files
+* Section 7.2.2:: Using the `obj' Format To Generate `.COM' Files
+
+
+File: nasm.info,  Node: Section 7.2.1,  Next: Section 7.2.2,  Prev: Section 7.2,  Up: Section 7.2
+
+7.2.1. Using the `bin' Format To Generate `.COM' Files
+******************************************************
+
+   `.COM' files expect to be loaded at offset `100h' into their segment
+(though the segment may change). Execution then begins at `100h', i.e.
+right at the start of the program. So to write a `.COM' program, you
+would create a source file looking like
+
+               org 100h
+               section .text
+     start:    ; put your code here
+               section .data
+               ; put data items here
+               section .bss
+               ; put uninitialised data here
+
+   The `bin' format puts the `.text' section first in the file, so you
+can declare data or BSS items before beginning to write code if you
+want to and the code will still end up at the front of the file where it
+belongs.
+
+   The BSS (uninitialised data) section does not take up space in the
+`.COM' file itself: instead, addresses of BSS items are resolved to
+point at space beyond the end of the file, on the grounds that this
+will be free memory when the program is run. Therefore you should not
+rely on your BSS being initialised to all zeros when you run.
+
+   To assemble the above program, you should use a command line like
+
+     nasm myprog.asm -fbin -o myprog.com
+
+   The `bin' format would produce a file called `myprog' if no explicit
+output file name were specified, so you have to override it and give
+the desired file name.
+
+
+File: nasm.info,  Node: Section 7.2.2,  Next: Section 7.3,  Prev: Section 7.2.1,  Up: Section 7.2
+
+7.2.2. Using the `obj' Format To Generate `.COM' Files
+******************************************************
+
+   If you are writing a `.COM' program as more than one module, you may
+wish to assemble several `.OBJ' files and link them together into a
+`.COM' program. You can do this, provided you have a linker capable of
+outputting `.COM' files directly (TLINK does this), or alternatively a
+converter program such as `EXE2BIN' to transform the `.EXE' file output
+from the linker into a `.COM' file.
+
+   If you do this, you need to take care of several things:
+
+   * The first object file containing code should start its code
+     segment with a line like `RESB 100h'. This is to ensure that the
+     code begins at offset `100h' relative to the beginning of the code
+     segment, so that the linker or converter program does not have to
+     adjust address references within the file when generating the
+     `.COM' file. Other assemblers use an `ORG' directive for this
+     purpose, but `ORG' in NASM is a format-specific directive to the
+     `bin' output format, and does not mean the same thing as it does
+     in MASM-compatible assemblers.
+
+   * You don't need to define a stack segment.
+
+   * All your segments should be in the same group, so that every time
+     your code or data references a symbol offset, all offsets are
+     relative to the same segment base. This is because, when a `.COM'
+     file is loaded, all the segment registers contain the same value.
+
+
+File: nasm.info,  Node: Section 7.3,  Next: Section 7.4,  Prev: Section 7.2.2,  Up: Chapter 7
+
+7.3. Producing `.SYS' Files
+***************************
+
+   MS-DOS device drivers - `.SYS' files - are pure binary files,
+similar to `.COM' files, except that they start at origin zero rather
+than `100h'. Therefore, if you are writing a device driver using the
+`bin' format, you do not need the `ORG' directive, since the default
+origin for `bin' is zero. Similarly, if you are using `obj', you do not
+need the `RESB 100h' at the start of your code segment.
+
+   `.SYS' files start with a header structure, containing pointers to
+the various routines inside the driver which do the work. This
+structure should be defined at the start of the code segment, even
+though it is not actually code.
+
+   For more information on the format of `.SYS' files, and the data
+which has to go in the header structure, a list of books is given in the
+Frequently Asked Questions list for the newsgroup
+`comp.os.msdos.programmer'.
+
+
+File: nasm.info,  Node: Section 7.4,  Next: Section 7.4.1,  Prev: Section 7.3,  Up: Chapter 7
+
+7.4. Interfacing to 16-bit C Programs
+*************************************
+
+   This section covers the basics of writing assembly routines that
+call, or are called from, C programs. To do this, you would typically
+write an assembly module as a `.OBJ' file, and link it with your C
+modules to produce a mixed-language program.
+
+* Menu:
+
+* Section 7.4.1:: External Symbol Names
+* Section 7.4.2:: Memory Models
+* Section 7.4.3:: Function Definitions and Function Calls
+* Section 7.4.4:: Accessing Data Items
+* Section 7.4.5:: `c16.mac': Helper Macros for the 16-bit C Interface
+
+
+File: nasm.info,  Node: Section 7.4.1,  Next: Section 7.4.2,  Prev: Section 7.4,  Up: Section 7.4
+
+7.4.1. External Symbol Names
+****************************
+
+   C compilers have the convention that the names of all global symbols
+(functions or data) they define are formed by prefixing an underscore to
+the name as it appears in the C program. So, for example, the function
+a C programmer thinks of as `printf' appears to an assembly language
+programmer as `_printf'. This means that in your assembly programs, you
+can define symbols without a leading underscore, and not have to worry
+about name clashes with C symbols.
+
+   If you find the underscores inconvenient, you can define macros to
+replace the `GLOBAL' and `EXTERN' directives as follows:
+
+     %macro cglobal 1
+               global _%1
+     %define %1 _%1
+     %endmacro
+
+     %macro cextern 1
+               extern _%1
+     %define %1 _%1
+     %endmacro
+
+   (These forms of the macros only take one argument at a time; a `%rep'
+construct could solve this.)
+
+   If you then declare an external like this:
+
+               cextern printf
+
+   then the macro will expand it as
+
+               extern _printf
+     %define printf _printf
+
+   Thereafter, you can reference `printf' as if it was a symbol, and the
+preprocessor will put the leading underscore on where necessary.
+
+   The `cglobal' macro works similarly. You must use `cglobal' before
+defining the symbol in question, but you would have had to do that
+anyway if you used `GLOBAL'.
+
+
+File: nasm.info,  Node: Section 7.4.2,  Next: Section 7.4.3,  Prev: Section 7.4.1,  Up: Section 7.4
+
+7.4.2. Memory Models
+********************
+
+   NASM contains no mechanism to support the various C memory models
+directly; you have to keep track yourself of which one you are writing
+for. This means you have to keep track of the following things:
+
+   * In models using a single code segment (tiny, small and compact),
+     functions are near. This means that function pointers, when stored
+     in data segments or pushed on the stack as function arguments, are
+     16 bits long and contain only an offset field (the `CS' register
+     never changes its value, and always gives the segment part of the
+     full function address), and that functions are called using
+     ordinary near `CALL' instructions and return using `RETN' (which,
+     in NASM, is synonymous with `RET' anyway). This means both that
+     you should write your own routines to return with `RETN', and that
+     you should call external C routines with near `CALL' instructions.
+
+   * In models using more than one code segment (medium, large and
+     huge), functions are far. This means that function pointers are 32
+     bits long (consisting of a 16-bit offset followed by a 16-bit
+     segment), and that functions are called using `CALL FAR' (or `CALL
+     seg:offset') and return using `RETF'. Again, you should therefore
+     write your own routines to return with `RETF' and use `CALL FAR'
+     to call external routines.
+
+   * In models using a single data segment (tiny, small and medium),
+     data pointers are 16 bits long, containing only an offset field
+     (the `DS' register doesn't change its value, and always gives the
+     segment part of the full data item address).
+
+   * In models using more than one data segment (compact, large and
+     huge), data pointers are 32 bits long, consisting of a 16-bit
+     offset followed by a 16- bit segment. You should still be careful
+     not to modify `DS' in your routines without restoring it
+     afterwards, but `ES' is free for you to use to access the contents
+     of 32-bit data pointers you are passed.
+
+   * The huge memory model allows single data items to exceed 64K in
+     size. In all other memory models, you can access the whole of a
+     data item just by doing arithmetic on the offset field of the
+     pointer you are given, whether a segment field is present or not;
+     in huge model, you have to be more careful of your pointer
+     arithmetic.
+
+   * In most memory models, there is a _default_ data segment, whose
+     segment address is kept in `DS' throughout the program. This data
+     segment is typically the same segment as the stack, kept in `SS',
+     so that functions' local variables (which are stored on the stack)
+     and global data items can both be accessed easily without changing
+     `DS'.  Particularly large data items are typically stored in other
+     segments.  However, some memory models (though not the standard
+     ones, usually) allow the assumption that `SS' and `DS' hold the
+     same value to be removed. Be careful about functions' local
+     variables in this latter case.
+
+   In models with a single code segment, the segment is called `_TEXT',
+so your code segment must also go by this name in order to be linked
+into the same place as the main code segment. In models with a single
+data segment, or with a default data segment, it is called `_DATA'.
+
+
+File: nasm.info,  Node: Section 7.4.3,  Next: Section 7.4.4,  Prev: Section 7.4.2,  Up: Section 7.4
+
+7.4.3. Function Definitions and Function Calls
+**********************************************
+
+   The C calling convention in 16-bit programs is as follows. In the
+following description, the words _caller_ and _callee_ are used to
+denote the function doing the calling and the function which gets
+called.
+
+   * The caller pushes the function's parameters on the stack, one after
+     another, in reverse order (right to left, so that the first
+     argument specified to the function is pushed last).
+
+   * The caller then executes a `CALL' instruction to pass control to
+     the callee. This `CALL' is either near or far depending on the
+     memory model.
+
+   * The callee receives control, and typically (although this is not
+     actually necessary, in functions which do not need to access their
+     parameters) starts by saving the value of `SP' in `BP' so as to be
+     able to use `BP' as a base pointer to find its parameters on the
+     stack.  However, the caller was probably doing this too, so part
+     of the calling convention states that `BP' must be preserved by
+     any C function. Hence the callee, if it is going to set up `BP' as
+     a _frame pointer_, must push the previous value first.
+
+   * The callee may then access its parameters relative to `BP'. The
+     word at `[BP]' holds the previous value of `BP' as it was pushed;
+     the next word, at `[BP+2]', holds the offset part of the return
+     address, pushed implicitly by `CALL'. In a small-model (near)
+     function, the parameters start after that, at `[BP+4]'; in a
+     large-model (far) function, the segment part of the return address
+     lives at `[BP+4]', and the parameters begin at `[BP+6]'. The
+     leftmost parameter of the function, since it was pushed last, is
+     accessible at this offset from `BP'; the others follow, at
+     successively greater offsets. Thus, in a function such as `printf'
+     which takes a variable number of parameters, the pushing of the
+     parameters in reverse order means that the function knows where to
+     find its first parameter, which tells it the number and type of
+     the remaining ones.
+
+   * The callee may also wish to decrease `SP' further, so as to
+     allocate space on the stack for local variables, which will then
+     be accessible at negative offsets from `BP'.
+
+   * The callee, if it wishes to return a value to the caller, should
+     leave the value in `AL', `AX' or `DX:AX' depending on the size of
+     the value. Floating-point results are sometimes (depending on the
+     compiler) returned in `ST0'.
+
+   * Once the callee has finished processing, it restores `SP' from
+     `BP' if it had allocated local stack space, then pops the previous
+     value of `BP', and returns via `RETN' or `RETF' depending on
+     memory model.
+
+   * When the caller regains control from the callee, the function
+     parameters are still on the stack, so it typically adds an
+     immediate constant to `SP' to remove them (instead of executing a
+     number of slow `POP' instructions). Thus, if a function is
+     accidentally called with the wrong number of parameters due to a
+     prototype mismatch, the stack will still be returned to a sensible
+     state since the caller, which _knows_ how many parameters it
+     pushed, does the removing.
+
+   It is instructive to compare this calling convention with that for
+Pascal programs (described in *Note Section 7.5.1::). Pascal has a
+simpler convention, since no functions have variable numbers of
+parameters.  Therefore the callee knows how many parameters it should
+have been passed, and is able to deallocate them from the stack itself
+by passing an immediate argument to the `RET' or `RETF' instruction, so
+the caller does not have to do it. Also, the parameters are pushed in
+left-to- right order, not right-to-left, which means that a compiler
+can give better guarantees about sequence points without performance
+suffering.
+
+   Thus, you would define a function in C style in the following way.
+The following example is for small model:
+
+               global _myfunc
+     _myfunc:  push bp
+               mov bp,sp
+               sub sp,0x40            ; 64 bytes of local stack space
+               mov bx,[bp+4]          ; first parameter to function
+               ; some more code
+               mov sp,bp              ; undo "sub sp,0x40" above
+               pop bp
+               ret
+
+   For a large-model function, you would replace `RET' by `RETF', and
+look for the first parameter at `[BP+6]' instead of `[BP+4]'.  Of
+course, if one of the parameters is a pointer, then the offsets of
+_subsequent_ parameters will change depending on the memory model as
+well: far pointers take up four bytes on the stack when passed as a
+parameter, whereas near pointers take up two.
+
+   At the other end of the process, to call a C function from your
+assembly code, you would do something like this:
+
+               extern _printf
+               ; and then, further down...
+               push word [myint]      ; one of my integer variables
+               push word mystring     ; pointer into my data segment
+               call _printf
+               add sp,byte 4          ; `byte' saves space
+               ; then those data items...
+               segment _DATA
+     myint     dw 1234
+     mystring  db 'This number -> %d <- should be 1234',10,0
+
+   This piece of code is the small-model assembly equivalent of the C
+code
+
+         int myint = 1234;
+         printf("This number -> %d <- should be 1234\n", myint);
+
+   In large model, the function-call code might look more like this. In
+this example, it is assumed that `DS' already holds the segment base of
+the segment `_DATA'. If not, you would have to initialise it first.
+
+               push word [myint]
+               push word seg mystring ; Now push the segment, and...
+               push word mystring     ; ... offset of "mystring"
+               call far _printf
+               add sp,byte 6
+
+   The integer value still takes up one word on the stack, since large
+model does not affect the size of the `int' data type. The first
+argument (pushed last) to `printf', however, is a data pointer, and
+therefore has to contain a segment and offset part. The segment should
+be stored second in memory, and therefore must be pushed first. (Of
+course, `PUSH DS' would have been a shorter instruction than `PUSH WORD
+SEG mystring', if `DS' was set up as the above example assumed.) Then
+the actual call becomes a far call, since functions expect far calls in
+large model; and `SP' has to be increased by 6 rather than 4 afterwards
+to make up for the extra word of parameters.
+
+
+File: nasm.info,  Node: Section 7.4.4,  Next: Section 7.4.5,  Prev: Section 7.4.3,  Up: Section 7.4
+
+7.4.4. Accessing Data Items
+***************************
+
+   To get at the contents of C variables, or to declare variables which
+C can access, you need only declare the names as `GLOBAL' or `EXTERN'.
+(Again, the names require leading underscores, as stated in *Note
+Section 7.4.1::.) Thus, a C variable declared as `int i' can be
+accessed from assembler as
+
+               extern _i
+               mov ax,[_i]
+
+   And to declare your own integer variable which C programs can access
+as `extern int j', you do this (making sure you are assembling in the
+`_DATA' segment, if necessary):
+
+               global _j
+     _j        dw 0
+
+   To access a C array, you need to know the size of the components of
+the array. For example, `int' variables are two bytes long, so if a C
+program declares an array as `int a[10]', you can access `a[3]' by
+coding `mov ax,[_a+6]'. (The byte offset 6 is obtained by multiplying
+the desired array index, 3, by the size of the array element, 2.) The
+sizes of the C base types in 16-bit compilers are: 1 for `char', 2 for
+`short' and `int', 4 for `long' and `float', and 8 for `double'.
+
+   To access a C data structure, you need to know the offset from the
+base of the structure to the field you are interested in. You can
+either do this by converting the C structure definition into a NASM
+structure definition (using `STRUC'), or by calculating the one offset
+and using just that.
+
+   To do either of these, you should read your C compiler's manual to
+find out how it organises data structures. NASM gives no special
+alignment to structure members in its own `STRUC' macro, so you have to
+specify alignment yourself if the C compiler generates it. Typically,
+you might find that a structure like
+
+     struct {
+         char c;
+         int i;
+     } foo;
+
+   might be four bytes long rather than three, since the `int' field
+would be aligned to a two-byte boundary. However, this sort of feature
+tends to be a configurable option in the C compiler, either using
+command- line options or `#pragma' lines, so you have to find out how
+your own compiler does it.
+
+
+File: nasm.info,  Node: Section 7.4.5,  Next: Section 7.5,  Prev: Section 7.4.4,  Up: Section 7.4
+
+7.4.5. `c16.mac': Helper Macros for the 16-bit C Interface
+**********************************************************
+
+   Included in the NASM archives, in the `misc' directory, is a file
+`c16.mac' of macros. It defines three macros: `proc', `arg' and
+`endproc'. These are intended to be used for C-style procedure
+definitions, and they automate a lot of the work involved in keeping
+track of the calling convention.
+
+   An example of an assembly function using the macro set is given here:
+
+               proc _nearproc
+     %$i       arg
+     %$j       arg
+               mov ax,[bp + %$i]
+               mov bx,[bp + %$j]
+               add ax,[bx]
+               endproc
+
+   This defines `_nearproc' to be a procedure taking two arguments, the
+first (`i') an integer and the second (`j') a pointer to an integer. It
+returns `i + *j'.
+
+   Note that the `arg' macro has an `EQU' as the first line of its
+expansion, and since the label before the macro call gets prepended to
+the first line of the expanded macro, the `EQU' works, defining `%$i'
+to be an offset from `BP'. A context-local variable is used, local to
+the context pushed by the `proc' macro and popped by the `endproc'
+macro, so that the same argument name can be used in later procedures.
+Of course, you don't _have_ to do that.
+
+   The macro set produces code for near functions (tiny, small and
+compact- model code) by default. You can have it generate far functions
+(medium, large and huge-model code) by means of coding `%define
+FARCODE'. This changes the kind of return instruction generated by
+`endproc', and also changes the starting point for the argument
+offsets. The macro set contains no intrinsic dependency on whether data
+pointers are far or not.
+
+   `arg' can take an optional parameter, giving the size of the
+argument.  If no size is given, 2 is assumed, since it is likely that
+many function parameters will be of type `int'.
+
+   The large-model equivalent of the above function would look like
+this:
+
+     %define FARCODE
+               proc _farproc
+     %$i       arg
+     %$j       arg 4
+               mov ax,[bp + %$i]
+               mov bx,[bp + %$j]
+               mov es,[bp + %$j + 2]
+               add ax,[bx]
+               endproc
+
+   This makes use of the argument to the `arg' macro to define a
+parameter of size 4, because `j' is now a far pointer. When we load
+from `j', we must load a segment and an offset.
+
+
+File: nasm.info,  Node: Section 7.5,  Next: Section 7.5.1,  Prev: Section 7.4.5,  Up: Chapter 7
+
+7.5. Interfacing to Borland Pascal Programs
+*******************************************
+
+   Interfacing to Borland Pascal programs is similar in concept to
+interfacing to 16-bit C programs. The differences are:
+
+   * The leading underscore required for interfacing to C programs is
+     not required for Pascal.
+
+   * The memory model is always large: functions are far, data pointers
+     are far, and no data item can be more than 64K long. (Actually,
+     some functions are near, but only those functions that are local
+     to a Pascal unit and never called from outside it. All assembly
+     functions that Pascal calls, and all Pascal functions that
+     assembly routines are able to call, are far.)  However, all static
+     data declared in a Pascal program goes into the default data
+     segment, which is the one whose segment address will be in `DS'
+     when control is passed to your assembly code. The only things that
+     do not live in the default data segment are local variables (they
+     live in the stack segment) and dynamically allocated variables.
+     All data _pointers_, however, are far.
+
+   * The function calling convention is different - described below.
+
+   * Some data types, such as strings, are stored differently.
+
+   * There are restrictions on the segment names you are allowed to use
+     - Borland Pascal will ignore code or data declared in a segment it
+     doesn't like the name of. The restrictions are described below.
+
+* Menu:
+
+* Section 7.5.1:: The Pascal Calling Convention
+* Section 7.5.2:: Borland Pascal Segment Name Restrictions
+* Section 7.5.3:: Using `c16.mac' With Pascal Programs
+
+
+File: nasm.info,  Node: Section 7.5.1,  Next: Section 7.5.2,  Prev: Section 7.5,  Up: Section 7.5
+
+7.5.1. The Pascal Calling Convention
+************************************
+
+   The 16-bit Pascal calling convention is as follows. In the following
+description, the words _caller_ and _callee_ are used to denote the
+function doing the calling and the function which gets called.
+
+   * The caller pushes the function's parameters on the stack, one after
+     another, in normal order (left to right, so that the first argument
+     specified to the function is pushed first).
+
+   * The caller then executes a far `CALL' instruction to pass control
+     to the callee.
+
+   * The callee receives control, and typically (although this is not
+     actually necessary, in functions which do not need to access their
+     parameters) starts by saving the value of `SP' in `BP' so as to be
+     able to use `BP' as a base pointer to find its parameters on the
+     stack.  However, the caller was probably doing this too, so part
+     of the calling convention states that `BP' must be preserved by
+     any function. Hence the callee, if it is going to set up `BP' as a
+     frame pointer, must push the previous value first.
+
+   * The callee may then access its parameters relative to `BP'. The
+     word at `[BP]' holds the previous value of `BP' as it was pushed.
+     The next word, at `[BP+2]', holds the offset part of the return
+     address, and the next one at `[BP+4]' the segment part. The
+     parameters begin at `[BP+6]'. The rightmost parameter of the
+     function, since it was pushed last, is accessible at this offset
+     from `BP'; the others follow, at successively greater offsets.
+
+   * The callee may also wish to decrease `SP' further, so as to
+     allocate space on the stack for local variables, which will then
+     be accessible at negative offsets from `BP'.
+
+   * The callee, if it wishes to return a value to the caller, should
+     leave the value in `AL', `AX' or `DX:AX' depending on the size of
+     the value. Floating-point results are returned in `ST0'. Results
+     of type `Real' (Borland's own custom floating-point data type, not
+     handled directly by the FPU) are returned in `DX:BX:AX'. To return
+     a result of type `String', the caller pushes a pointer to a
+     temporary string before pushing the parameters, and the callee
+     places the returned string value at that location. The pointer is
+     not a parameter, and should not be removed from the stack by the
+     `RETF' instruction.
+
+   * Once the callee has finished processing, it restores `SP' from
+     `BP' if it had allocated local stack space, then pops the previous
+     value of `BP', and returns via `RETF'. It uses the form of `RETF'
+     with an immediate parameter, giving the number of bytes taken up
+     by the parameters on the stack. This causes the parameters to be
+     removed from the stack as a side effect of the return instruction.
+
+   * When the caller regains control from the callee, the function
+     parameters have already been removed from the stack, so it needs
+     to do nothing further.
+
+   Thus, you would define a function in Pascal style, taking two
+`Integer'-type parameters, in the following way:
+
+               global myfunc
+     myfunc:   push bp
+               mov bp,sp
+               sub sp,0x40            ; 64 bytes of local stack space
+               mov bx,[bp+8]          ; first parameter to function
+               mov bx,[bp+6]          ; second parameter to function
+               ; some more code
+               mov sp,bp              ; undo "sub sp,0x40" above
+               pop bp
+               retf 4                 ; total size of params is 4
+
+   At the other end of the process, to call a Pascal function from your
+assembly code, you would do something like this:
+
+               extern SomeFunc
+               ; and then, further down...
+               push word seg mystring ; Now push the segment, and...
+               push word mystring     ; ... offset of "mystring"
+               push word [myint]      ; one of my variables
+               call far SomeFunc
+
+   This is equivalent to the Pascal code
+
+     procedure SomeFunc(String: PChar; Int: Integer);
+         SomeFunc(@mystring, myint);
+

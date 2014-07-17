@@ -1,0 +1,5 @@
+NAME        SHOWBMP
+DESCRIPTION 'Full Screen MGL Bitmap Loading Demo'
+CODE    	PRELOAD
+DATA    	PRELOAD MULTIPLE
+

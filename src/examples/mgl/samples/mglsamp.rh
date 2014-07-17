@@ -1,0 +1,24 @@
+#define	IDD_MAINDLG			1000
+
+#define IDC_OK				1
+#define IDC_CANCEL			2
+#define IDC_MODELIST		100
+#define IDC_4BIT			101
+#define IDC_8BIT			102
+#define IDC_15BIT			103
+#define IDC_16BIT			104
+#define IDC_24BIT			105
+#define IDC_32BIT			106
+#define IDC_VERSIONSTR		107
+#define IDC_COPYRIGHTSTR	108
+#define IDC_USEDDRAW		109
+#define IDC_USEBOTH			110
+#define IDC_USEWDIRECT		111
+#define IDC_OPTIONS			112
+#define IDC_COLORDEPTH		113
+
+#define ID_APP				10000
+
+#define	MAX_MODES	15
+#define	MAX_STR		100
+

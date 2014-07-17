@@ -1,0 +1,48 @@
+; Special version for Microsoft Visual C++
+
+LIBRARY         MGLGM
+DESCRIPTION     'Game Framework Delphi DLL'
+CODE          	LOADONCALL EXECUTEONLY
+DATA            PRELOAD MOVEABLE MULTIPLE
+
+EXPORTS
+    _GM_initSysPalNoStatic
+    _GM_initPath
+    _GM_init
+    _GM_setDrawFunc
+    _GM_setKeyDownFunc
+    _GM_setKeyRepeatFunc
+    _GM_setKeyUpFunc
+    _GM_setMouseDownFunc
+    _GM_setMouseUpFunc
+    _GM_setMouseMoveFunc
+    _GM_setEventFunc
+    _GM_setGameLogicFunc
+    _GM_setExitFunc
+    _GM_setSwitchToFullscreenFunc
+    _GM_setSwitchToWindowedFunc
+    _GM_setAppActivate
+    _GM_setSuspendAppCallback
+    _GM_registerEventProc
+    _GM_availableModes
+    _GM_availablePages
+    _GM_modeResolution
+    _GM_setWindowedMode
+    _GM_setFullScreenMode
+    _GM_startOpenGL
+    _GM_swapBuffers
+    _GM_swapDirtyBuffers
+    _GM_setPalette
+    _GM_realizePalette
+    _GM_mainLoop
+    _GM_exit
+    _SPR_mgrInit
+    _SPR_mgrExit
+    _SPR_mgrEmpty
+    _SPR_mgrReloadHW
+    _SPR_mgrUsingOffscreenDC
+    _SPR_mgrOffscreenCacheFull
+    _SPR_mgrAddOpaqueBitmap
+    _SPR_mgrAddTransparentBitmap
+    _SPR_draw
+

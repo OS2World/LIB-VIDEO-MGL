@@ -1,0 +1,73 @@
+;****************************************************************************
+;*
+;*				  High Speed Fixed/Floating Point Library
+;*
+;*  ========================================================================
+;*
+;*    The contents of this file are subject to the SciTech MGL Public
+;*    License Version 1.0 (the "License"); you may not use this file
+;*    except in compliance with the License. You may obtain a copy of
+;*    the License at http://www.scitechsoft.com/mgl-license.txt
+;*
+;*    Software distributed under the License is distributed on an
+;*    "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+;*    implied. See the License for the specific language governing
+;*    rights and limitations under the License.
+;*
+;*    The Original Code is Copyright (C) 1991-1998 SciTech Software, Inc.
+;*
+;*    The Initial Developer of the Original Code is SciTech Software, Inc.
+;*    All Rights Reserved.
+;*
+;*  ========================================================================
+;*
+;* Language:	80386 Assembler
+;* Environment:	IBM PC (MS DOS)
+;*
+;* Description:	Macros used by the fixed point assembler routines.
+;*
+;****************************************************************************
+
+ifdef 	USE_NASM
+
+; Define a macro to round the multiplied value in EAX:EDX and stick the
+; resulting fixed point number in EAX.
+
+%macro 	ROUNDIT
+		add		eax,8000h		; Round by adding 2^-17
+		adc		edx,0			; Whole part of result is in EDX
+		shrd	eax,edx,16		; Shift the fractional part into EAX
+%endmacro
+
+; Define a macro to round the result in EBX:ECX and stick the resulting
+; fixed point number in EAX.
+
+%macro	ROUNDIT_EBX_ECX
+		mov		eax,ecx
+		add		eax,8000h		; Round by adding 2^-17
+		adc		ebx,0			; Whole part of result is in EBX
+		shrd	eax,ebx,16		; Shift the fractional part into EAX
+%endmacro
+
+else
+
+; Define a macro to round the multiplied value in EAX:EDX and stick the
+; resulting fixed point number in EAX.
+
+MACRO	ROUNDIT
+		add		eax,8000h		; Round by adding 2^-17
+		adc		edx,0			; Whole part of result is in EDX
+		shrd	eax,edx,16		; Shift the fractional part into EAX
+ENDM
+
+; Define a macro to round the result in EBX:ECX and stick the resulting
+; fixed point number in EAX.
+
+MACRO	ROUNDIT_EBX_ECX
+		mov		eax,ecx
+		add		eax,8000h		; Round by adding 2^-17
+		adc		ebx,0			; Whole part of result is in EBX
+		shrd	eax,ebx,16		; Shift the fractional part into EAX
+ENDM
+
+endif

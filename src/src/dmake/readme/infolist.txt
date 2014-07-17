@@ -1,0 +1,20 @@
+DMAKE 4.1 [http://dmake.wticorp.com/]
+
+After you install dmake please check the
+
+     <install-directory>/readme/gold/install.txt
+
+file for information covering configuration
+of dmake for non-Borland compilers.
+
+For general information concerning dmake
+and dmake Gold installation visit the help
+subdirectory tree:
+
+     <install-directory>/readme/read1st.txt
+
+For all other issues visit the Dmake WWW Site
+at:
+
+     http://dmake.wticorp.com/
+

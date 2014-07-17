@@ -1,0 +1,211 @@
+
+                     SciTech Nucleus License Agreement
+                                Version 1.0
+                              ----------------
+
+PREAMBLE
+
+     SciTech Software has made a tremendous investment over many years in
+     the development of SciTech Nucleus Device Driver architecture. SciTech
+     is releasing the header files and device driver loader library source
+     code under a special license that is different to the SciTech MGL
+     Public License. The intent of this license is to all developers wishing
+     to utilise the SciTech Nucleus device drivers in their applications
+     or Operating Systems, the ability to do so without restriction.
+     However the SciTech Nucleus License Agreement specifically excludes
+     use of the headers and source code to build device drivers that
+     compete with SciTech Software's core, commercial products, free or
+     otherwise.
+
+     Hence if you are an application developer or operating system
+     developer, you may use the headers and loader library source code to
+     add support for Nucleus device drivers to your products.
+
+     If you are a device driver developer, you may *not* use the Nucleus
+     header files and loader library source to build device drivers
+     products that are compatible with the SciTech Nucleus device driver
+     architecture (ie: binary compatible drivers that can replace our
+     commercial drivers).
+
+1. Definitions.
+
+     1.1. ``SciTech'' means SciTech Software Inc, located at 505 Wall Street,
+     Chico, CA 95928 USA (http://www.scitechsoft.com).
+
+     1.2. ``SciTech Display Doctor'' means any version of the commercial
+     device driver products developed and sold by SciTech.
+
+     1.3. ``Covered Code'' means the Original Code.
+
+     1.4. ``Electronic Distribution Mechanism'' means a mechanism generally
+     accepted in the software development community for the electronic
+     transfer of data.
+
+     1.5. ``Executable'' means Covered Code in any form other than Source
+     Code.
+
+     1.6. ``Larger Work'' means a work which combines Covered Code or
+     portions thereof with code not governed by the terms of this License.
+
+     1.7. ``License'' means this document.
+
+     1.8. ``Source Code'' means the preferred form of the Covered Code,
+     including all modules it contains.
+
+     1.9. ``You'' means an individual or a legal entity exercising rights
+     under, and complying with all of the terms of, this License. For legal
+     entities, ``You'' includes any entity which controls, is controlled
+     by, or is under common control with You. For purposes of this definition,
+     ``control'' means (a) the power, direct or indirect, to cause the
+     direction or management of such entity, whether by contract or
+     otherwise, or (b) ownership of fifty percent (50%) or more of the
+     outstanding shares or beneficial ownership of such entity.
+
+2. Source Code License.
+
+     2.1. The SciTech Grant.
+     SciTech hereby grants You a world-wide, royalty-free, non-exclusive
+     license, subject to third party intellectual property claims:
+
+          (a) to use, reproduce, display, perform, sublicense and distribute
+          the Original Code WITHOUT Modifications, or as part of a Larger
+          Work.
+
+     2.2. Modifications.
+     You may NOT under any circumstances make and/or distribute modifications
+     to the Source Code. You may only use and distribute unmodified official
+     versions of the Source Code as published by SciTech.
+
+3. Distribution Obligations.
+
+     3.1. Application of License.
+     The Source Code version of Covered Code may be distributed only under
+     the terms of this License, and You must include a copy of this License
+     with every copy of the Source Code You distribute. You may not offer
+     or impose any terms on any Source Code version that alters or
+     restricts the applicable version of this License or the recipients'
+     rights hereunder.
+
+     3.2. Distribution of Executable Versions.
+     You may distribute Covered Code in Executable form only if the
+     requirements of Section 3.1-3.3 have been met for that Covered Code.
+     You may distribute the Executable version of Covered Code under a
+     license of Your choice, which may contain terms different from this
+     License, provided that You are in compliance with the terms of this
+     License. You hereby agree to indemnify the SciTech for any liability
+     incurred by the SciTech as a result of any such terms You offer.
+
+     3.3. Larger Works.
+     You may create a Larger Work by combining Covered Code with other code
+     not governed by the terms of this License and distribute the Larger
+     Work as a single product, provided that the Larger Work is NOT a
+     device driver product that competes with SciTech Display Doctor,
+     whether the Larger Work is free or sold for profit.
+
+4. Application of this License.
+
+     This License applies to code to which the SciTech has
+     attached the notice in Exhibit A, and to related Covered Code.
+
+5. DISCLAIMER OF WARRANTY.
+
+     COVERED CODE IS PROVIDED UNDER THIS LICENSE ON AN ``AS IS'' BASIS,
+     WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING,
+     WITHOUT LIMITATION, WARRANTIES THAT THE COVERED CODE IS FREE OF
+     DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR NON-INFRINGING.
+     THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE COVERED CODE
+     IS WITH YOU. SHOULD ANY COVERED CODE PROVE DEFECTIVE IN ANY RESPECT,
+     YOU (NOT THE SciTech OR ANY OTHER CONTRIBUTOR) ASSUME THE
+     COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER
+     OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF
+     ANY COVERED CODE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+6. TERMINATION.
+
+     This License and the rights granted hereunder will terminate
+     automatically if You fail to comply with terms herein and fail to cure
+     such breach within 30 days of becoming aware of the breach. All
+     sublicenses to the Covered Code which are properly granted shall
+     survive any termination of this License. Provisions which, by their
+     nature, must remain in effect beyond the termination of this License
+     shall survive.
+
+7. LIMITATION OF LIABILITY.
+
+     UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT
+     (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL THE INITIAL
+     DEVELOPER, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED CODE,
+     OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO YOU OR ANY OTHER
+     PERSON FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+     OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF
+     GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND
+     ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN IF SUCH PARTY SHALL HAVE
+     BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF
+     LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY
+     RESULTING FROM SUCH PARTY'S NEGLIGENCE TO THE EXTENT APPLICABLE LAW
+     PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE
+     EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THAT
+     EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+
+8. U.S. GOVERNMENT END USERS.
+
+     The Covered Code is a ``commercial item,'' as that term is defined in
+     48 C.F.R. 2.101 (Oct. 1995), consisting of ``commercial computer
+     software'' and ``commercial computer software documentation,'' as such
+     terms are used in 48 C.F.R. 12.212 (Sept. 1995). Consistent with 48
+     C.F.R. 12.212 and 48 C.F.R. 227.7202-1 through 227.7202-4 (June 1995),
+     all U.S. Government End Users acquire Covered Code with only those
+     rights set forth herein.
+
+9. MISCELLANEOUS.
+
+     This License represents the complete agreement concerning subject
+     matter hereof. If any provision of this License is held to be
+     unenforceable, such provision shall be reformed only to the extent
+     necessary to make it enforceable. This License shall be governed by
+     California law provisions (except to the extent applicable law, if any,
+     provides otherwise), excluding its conflict-of-law provisions. With
+     respect to disputes in which at least one party is a citizen of, or an
+     entity chartered or registered to do business in, the United States of
+     America: (a) unless otherwise agreed in writing, all disputes relating
+     to this License (excepting any dispute relating to intellectual
+     property rights) shall be subject to final and binding arbitration,
+     with the losing party paying all costs of arbitration; (b) any
+     arbitration relating to this Agreement shall be held in Butte
+     County, California, under the auspices of JAMS/EndDispute; and (c) any
+     litigation relating to this Agreement shall be subject to the
+     jurisdiction of the Federal Courts of the Northern District of
+     California, with venue lying in Butte County, California, with
+     the losing party responsible for costs, including without limitation,
+     court costs and reasonable attorneys fees and expenses. The application
+     of the United Nations Convention on Contracts for the International
+     Sale of Goods is expressly excluded. Any law or regulation which
+     provides that the language of a contract shall be construed against the
+     drafter shall not apply to this License.
+
+10. RESPONSIBILITY FOR CLAIMS.
+
+     Except in cases where another Contributor has failed to comply with
+     Section 3.4, You are responsible for damages arising, directly or
+     indirectly, out of Your utilization of rights under this License, based
+     on the number of copies of Covered Code you made available, the
+     revenues you received from utilizing such rights, and other relevant
+     factors. You agree to work with affected parties to distribute
+     responsibility on an equitable basis.
+
+EXHIBIT A.
+
+   ``This copyrighted computer code contains proprietary technology
+     owned by SciTech Software, Inc., located at 505 Wall Street,
+     Chico, CA 95928 USA (http://www.scitechsoft.com).
+
+     The contents of this file are subject to the SciTech Nucleus
+     License; you may *not* use this file or related software except in
+     compliance with the License. You may obtain a copy of the License
+     at http://www.scitechsoft.com/nucleus-license.txt
+
+     Software distributed under the License is distributed on an
+     "AS IS" basis, WITHOUT WARRANTY OF ANY KIND, either express or
+     implied. See the License for the specific language governing
+     rights and limitations under the License.''
+

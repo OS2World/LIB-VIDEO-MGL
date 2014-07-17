@@ -1,0 +1,26 @@
+CFLAGS=-g -I/usr/include -I../../include/ -O0 -Wall
+CC=gcc
+SRCS = main.c io.c x86emu.c int.c pci.c
+OBJS = main.o io.o x86emu.o int.o pci.o
+
+all :  vbios.vm86 vbios.x86emu
+
+main.o : main.c v86bios.h debug.h
+io.o : v86bios.h AsmMacros.h debug.h
+mem.o : mem.c debug.h v86bios.h
+int.o : int.c v86bios.h debug.h
+pci.o : pci.c pci.h debug.h
+console.o : console.c v86bios.h
+v86.o : v86.c debug.h
+x86emu.o : x86emu.c v86bios.h debug.h
+	$(CC) -c -DX86EMU $(CFLAGS) $*.c
+
+vbios.x86emu : main.o x86emu.o io.o int.o pci.o console.o
+	gcc -o vbios.x86emu main.o x86emu.o io.o int.o pci.o console.o\
+	-L../x86emu -lx86emu -lc 
+vbios.vm86 : main.o v86.o io.o int.o pci.o console.o
+	gcc -o vbios.vm86 main.o v86.o io.o int.o pci.o console.o -lc 
+
+clean:
+	rm -f *.o vbios.x86emu vbios.vm86
+

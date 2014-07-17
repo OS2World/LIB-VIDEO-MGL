@@ -1,0 +1,5 @@
+NAME        MGLDOG
+DESCRIPTION	'Full Screen MGL Sprite Demo'
+CODE    	PRELOAD
+DATA    	PRELOAD MULTIPLE
+

@@ -1,0 +1,32 @@
+Files changes from NASM 0.98 archives
+-------------------------------------
+
+All changes can be compiled in and out using the TASM_COMPAT macros,
+and when compiled without TASM_COMPAT defined we get the exact same
+binary as the unmodified 0.98 sources.
+
+standard.mac:
+macros.c:
+ . Added macros to ignore TASM directives before first include
+
+nasm.h:
+ . Added extern declaration for tasm_compatible_mode
+
+nasm.c:
+ . Added global variable tasm_compatible_mode
+ . Added command line switch for TASM compatible mode (-t)
+ . Changed version command line to reflect when compiled with TASM additions
+ . Added response file processing to allow all arguments on a single
+   line (response file is @resp rather than -@resp for NASM format).
+
+labels.c:
+ . Changes islocal() macro to support TASM style @@local labels.
+ . Added islocalchar() macro to support TASM style @@local labels.
+
+parser.c:
+ . Added support for TASM style memory references (ie: mov [DWORD eax],10
+   rather than the NASM style mov DWORD [eax],10).
+
+preproc.c:
+ . Added new directives, %arg, %local, %stacksize to directives table
+ . Added support for TASM style directives without a leading % symbol.

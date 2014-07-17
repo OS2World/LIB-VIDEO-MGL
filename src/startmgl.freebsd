@@ -1,0 +1,19 @@
+#! /bin/sh
+
+# FreeBSD VERSION
+
+# Batch file to create the initial setup for using the SciTech MGL
+# Graphics Library, using the selected default compiler.
+
+# Setup the default path environment variable
+
+# Setup the location to the MGL data files
+export MGL_ROOT=$HOME/devel
+
+# Initialise the default compile time environment
+
+. $MGL_ROOT/bin/set-vars-freebsd.sh
+. $MGL_ROOT/bin/gcc-freebsd.sh
+
+# Change to the directory containing all the MGL sample code
+cd $MGL_ROOT/examples/mgl

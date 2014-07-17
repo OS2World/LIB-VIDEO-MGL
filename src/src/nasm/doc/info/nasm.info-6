@@ -1,0 +1,1062 @@
+This is nasm.info, produced by Makeinfo version 3.12f from nasmdoc.texi.
+
+INFO-DIR-SECTION Programming
+START-INFO-DIR-ENTRY
+* NASM: (nasm).                The Netwide Assembler for x86.
+END-INFO-DIR-ENTRY
+
+
+   This file documents NASM, the Netwide Assembler: an assembler
+targetting the Intel x86 series of processors, with portable source.
+
+   Copyright 1997 Simon Tatham
+
+   All rights reserved. This document is redistributable under the
+licence given in the file "Licence" distributed in the NASM archive.
+
+
+File: nasm.info,  Node: Appendix A,  Next: Section A.1,  Prev: Section 10.2,  Up: Top
+
+Appendix A: Intel x86 Instruction Reference
+*******************************************
+
+   This appendix provides a complete list of the machine instructions
+which NASM will assemble, and a short description of the function of
+each one.
+
+   It is not intended to be exhaustive documentation on the fine
+details of the instructions' function, such as which exceptions they
+can trigger: for such documentation, you should go to Intel's Web site,
+`http://www.intel.com/'.
+
+   Instead, this appendix is intended primarily to provide
+documentation on the way the instructions may be used within NASM. For
+example, looking up `LOOP' will tell you that NASM allows `CX' or `ECX'
+to be specified as an optional second argument to the `LOOP'
+instruction, to enforce which of the two possible counter registers
+should be used if the default is not the one desired.
+
+   The instructions are not quite listed in alphabetical order, since
+groups of instructions with similar functions are lumped together in
+the same entry. Most of them don't move very far from their alphabetic
+position because of this.
+
+* Menu:
+
+* Section A.1:: Key to Operand Specifications
+* Section A.2:: Key to Opcode Descriptions
+* Section A.3:: Key to Instruction Flags
+* Section A.4:: `AAA', `AAS', `AAM', `AAD': ASCII Adjustments
+* Section A.5:: `ADC': Add with Carry
+* Section A.6:: `ADD': Add Integers
+* Section A.7:: `AND': Bitwise AND
+* Section A.8:: `ARPL': Adjust RPL Field of Selector
+* Section A.9:: `BOUND': Check Array Index against Bounds
+* Section A.10:: `BSF', `BSR': Bit Scan
+* Section A.11:: `BSWAP': Byte Swap
+* Section A.12:: `BT', `BTC', `BTR', `BTS': Bit Test
+* Section A.13:: `CALL': Call Subroutine
+* Section A.14:: `CBW', `CWD', `CDQ', `CWDE': Sign Extensions
+* Section A.15:: `CLC', `CLD', `CLI', `CLTS': Clear Flags
+* Section A.16:: `CMC': Complement Carry Flag
+* Section A.17:: `CMOVcc': Conditional Move
+* Section A.18:: `CMP': Compare Integers
+* Section A.19:: `CMPSB', `CMPSW', `CMPSD': Compare Strings
+* Section A.20:: `CMPXCHG', `CMPXCHG486': Compare and Exchange
+* Section A.21:: `CMPXCHG8B': Compare and Exchange Eight Bytes
+* Section A.22:: `CPUID': Get CPU Identification Code
+* Section A.23:: `DAA', `DAS': Decimal Adjustments
+* Section A.24:: `DEC': Decrement Integer
+* Section A.25:: `DIV': Unsigned Integer Divide
+* Section A.26:: `EMMS': Empty MMX State
+* Section A.27:: `ENTER': Create Stack Frame
+* Section A.28:: `F2XM1': Calculate 2**X-1
+* Section A.29:: `FABS': Floating-Point Absolute Value
+* Section A.30:: `FADD', `FADDP': Floating-Point Addition
+* Section A.31:: `FBLD', `FBSTP': BCD Floating-Point Load and Store
+* Section A.32:: `FCHS': Floating-Point Change Sign
+* Section A.33:: `FCLEX', {FNCLEX}: Clear Floating-Point Exceptions
+* Section A.34:: `FCMOVcc': Floating-Point Conditional Move
+* Section A.35:: `FCOM', `FCOMP', `FCOMPP', `FCOMI', `FCOMIP': Floating-Point Compare
+* Section A.36:: `FCOS': Cosine
+* Section A.37:: `FDECSTP': Decrement Floating-Point Stack Pointer
+* Section A.38:: `FxDISI', `FxENI': Disable and Enable Floating-Point Interrupts
+* Section A.39:: `FDIV', `FDIVP', `FDIVR', `FDIVRP': Floating-Point Division
+* Section A.40:: `FFREE': Flag Floating-Point Register as Unused
+* Section A.41:: `FIADD': Floating-Point/Integer Addition
+* Section A.42:: `FICOM', `FICOMP': Floating-Point/Integer Compare
+* Section A.43:: `FIDIV', `FIDIVR': Floating-Point/Integer Division
+* Section A.44:: `FILD', `FIST', `FISTP': Floating-Point/Integer Conversion
+* Section A.45:: `FIMUL': Floating-Point/Integer Multiplication
+* Section A.46:: `FINCSTP': Increment Floating-Point Stack Pointer
+* Section A.47:: `FINIT', `FNINIT': Initialise Floating-Point Unit
+* Section A.48:: `FISUB': Floating-Point/Integer Subtraction
+* Section A.49:: `FLD': Floating-Point Load
+* Section A.50:: `FLDxx': Floating-Point Load Constants
+* Section A.51:: `FLDCW': Load Floating-Point Control Word
+* Section A.52:: `FLDENV': Load Floating-Point Environment
+* Section A.53:: `FMUL', `FMULP': Floating-Point Multiply
+* Section A.54:: `FNOP': Floating-Point No Operation
+* Section A.55:: `FPATAN', `FPTAN': Arctangent and Tangent
+* Section A.56:: `FPREM', `FPREM1': Floating-Point Partial Remainder
+* Section A.57:: `FRNDINT': Floating-Point Round to Integer
+* Section A.58:: `FSAVE', `FRSTOR': Save/Restore Floating-Point State
+* Section A.59:: `FSCALE': Scale Floating-Point Value by Power of Two
+* Section A.60:: `FSETPM': Set Protected Mode
+* Section A.61:: `FSIN', `FSINCOS': Sine and Cosine
+* Section A.62:: `FSQRT': Floating-Point Square Root
+* Section A.63:: `FST', `FSTP': Floating-Point Store
+* Section A.64:: `FSTCW': Store Floating-Point Control Word
+* Section A.65:: `FSTENV': Store Floating-Point Environment
+* Section A.66:: `FSTSW': Store Floating-Point Status Word
+* Section A.67:: `FSUB', `FSUBP', `FSUBR', `FSUBRP': Floating-Point Subtract
+* Section A.68:: `FTST': Test `ST0' Against Zero
+* Section A.69:: `FUCOMxx': Floating-Point Unordered Compare
+* Section A.70:: `FXAM': Examine Class of Value in `ST0'
+* Section A.71:: `FXCH': Floating-Point Exchange
+* Section A.72:: `FXTRACT': Extract Exponent and Significand
+* Section A.73:: `FYL2X', `FYL2XP1': Compute Y times Log2(X) or Log2(X+1)
+* Section A.74:: `HLT': Halt Processor
+* Section A.75:: `IBTS': Insert Bit String
+* Section A.76:: `IDIV': Signed Integer Divide
+* Section A.77:: `IMUL': Signed Integer Multiply
+* Section A.78:: `IN': Input from I/O Port
+* Section A.79:: `INC': Increment Integer
+* Section A.80:: `INSB', `INSW', `INSD': Input String from I/O Port
+* Section A.81:: `INT': Software Interrupt
+* Section A.82:: `INT3', `INT1', `ICEBP', `INT01': Breakpoints
+* Section A.83:: `INTO': Interrupt if Overflow
+* Section A.84:: `INVD': Invalidate Internal Caches
+* Section A.85:: `INVLPG': Invalidate TLB Entry
+* Section A.86:: `IRET', `IRETW', `IRETD': Return from Interrupt
+* Section A.87:: `JCXZ', `JECXZ': Jump if CX/ECX Zero
+* Section A.88:: `JMP': Jump
+* Section A.89:: `Jcc': Conditional Branch
+* Section A.90:: `LAHF': Load AH from Flags
+* Section A.91:: `LAR': Load Access Rights
+* Section A.92:: `LDS', `LES', `LFS', `LGS', `LSS': Load Far Pointer
+* Section A.93:: `LEA': Load Effective Address
+* Section A.94:: `LEAVE': Destroy Stack Frame
+* Section A.95:: `LGDT', `LIDT', `LLDT': Load Descriptor Tables
+* Section A.96:: `LMSW': Load/Store Machine Status Word
+* Section A.97:: `LOADALL', `LOADALL286': Load Processor State
+* Section A.98:: `LODSB', `LODSW', `LODSD': Load from String
+* Section A.99:: `LOOP', `LOOPE', `LOOPZ', `LOOPNE', `LOOPNZ': Loop with Counter
+* Section A.100:: `LSL': Load Segment Limit
+* Section A.101:: `LTR': Load Task Register
+* Section A.102:: `MOV': Move Data
+* Section A.103:: `MOVD': Move Doubleword to/from MMX Register
+* Section A.104:: `MOVQ': Move Quadword to/from MMX Register
+* Section A.105:: `MOVSB', `MOVSW', `MOVSD': Move String
+* Section A.106:: `MOVSX', `MOVZX': Move Data with Sign or Zero Extend
+* Section A.107:: `MUL': Unsigned Integer Multiply
+* Section A.108:: `NEG', `NOT': Two's and One's Complement
+* Section A.109:: `NOP': No Operation
+* Section A.110:: `OR': Bitwise OR
+* Section A.111:: `OUT': Output Data to I/O Port
+* Section A.112:: `OUTSB', `OUTSW', `OUTSD': Output String to I/O Port
+* Section A.113:: `PACKSSDW', `PACKSSWB', `PACKUSWB': Pack Data
+* Section A.114:: `PADDxx': MMX Packed Addition
+* Section A.115:: `PADDSIW': MMX Packed Addition to Implicit Destination
+* Section A.116:: `PAND', `PANDN': MMX Bitwise AND and AND-NOT
+* Section A.117:: `PAVEB': MMX Packed Average
+* Section A.118:: `PCMPxx': MMX Packed Comparison
+* Section A.119:: `PDISTIB': MMX Packed Distance and Accumulate with Implied Register
+* Section A.120:: `PMACHRIW': MMX Packed Multiply and Accumulate with Rounding
+* Section A.121:: `PMADDWD': MMX Packed Multiply and Add
+* Section A.122:: `PMAGW': MMX Packed Magnitude
+* Section A.123:: `PMULHRW', `PMULHRIW': MMX Packed Multiply High with Rounding
+* Section A.124:: `PMULHW', `PMULLW': MMX Packed Multiply
+* Section A.125:: `PMVccZB': MMX Packed Conditional Move
+* Section A.126:: `POP': Pop Data from Stack
+* Section A.127:: `POPAx': Pop All General-Purpose Registers
+* Section A.128:: `POPFx': Pop Flags Register
+* Section A.129:: `POR': MMX Bitwise OR
+* Section A.130:: `PSLLx', `PSRLx', `PSRAx': MMX Bit Shifts
+* Section A.131:: `PSUBxx': MMX Packed Subtraction
+* Section A.132:: `PSUBSIW': MMX Packed Subtract with Saturation to Implied Destination
+* Section A.133:: `PUNPCKxxx': Unpack Data
+* Section A.134:: `PUSH': Push Data on Stack
+* Section A.135:: `PUSHAx': Push All General-Purpose Registers
+* Section A.136:: `PUSHFx': Push Flags Register
+* Section A.137:: `PXOR': MMX Bitwise XOR
+* Section A.138:: `RCL', `RCR': Bitwise Rotate through Carry Bit
+* Section A.139:: `RDMSR': Read Model-Specific Registers
+* Section A.140:: `RDPMC': Read Performance-Monitoring Counters
+* Section A.141:: `RDTSC': Read Time-Stamp Counter
+* Section A.142:: `RET', `RETF', `RETN': Return from Procedure Call
+* Section A.143:: `ROL', `ROR': Bitwise Rotate
+* Section A.144:: `RSM': Resume from System-Management Mode
+* Section A.145:: `SAHF': Store AH to Flags
+* Section A.146:: `SAL', `SAR': Bitwise Arithmetic Shifts
+* Section A.147:: `SALC': Set AL from Carry Flag
+* Section A.148:: `SBB': Subtract with Borrow
+* Section A.149:: `SCASB', `SCASW', `SCASD': Scan String
+* Section A.150:: `SETcc': Set Register from Condition
+* Section A.151:: `SGDT', `SIDT', `SLDT': Store Descriptor Table Pointers
+* Section A.152:: `SHL', `SHR': Bitwise Logical Shifts
+* Section A.153:: `SHLD', `SHRD': Bitwise Double-Precision Shifts
+* Section A.154:: `SMI': System Management Interrupt
+* Section A.155:: `SMSW': Store Machine Status Word
+* Section A.156:: `STC', `STD', `STI': Set Flags
+* Section A.157:: `STOSB', `STOSW', `STOSD': Store Byte to String
+* Section A.158:: `STR': Store Task Register
+* Section A.159:: `SUB': Subtract Integers
+* Section A.160:: `TEST': Test Bits (notional bitwise AND)
+* Section A.161:: `UMOV': User Move Data
+* Section A.162:: `VERR', `VERW': Verify Segment Readability/Writability
+* Section A.163:: `WAIT': Wait for Floating-Point Processor
+* Section A.164:: `WBINVD': Write Back and Invalidate Cache
+* Section A.165:: `WRMSR': Write Model-Specific Registers
+* Section A.166:: `XADD': Exchange and Add
+* Section A.167:: `XBTS': Extract Bit String
+* Section A.168:: `XCHG': Exchange
+* Section A.169:: `XLATB': Translate Byte in Lookup Table
+* Section A.170:: `XOR': Bitwise Exclusive OR
+
+
+File: nasm.info,  Node: Section A.1,  Next: Section A.2,  Prev: Appendix A,  Up: Appendix A
+
+A.1. Key to Operand Specifications
+**********************************
+
+   The instruction descriptions in this appendix specify their operands
+using the following notation:
+
+   * Registers: `reg8' denotes an 8-bit general purpose register,
+     `reg16' denotes a 16-bit general purpose register, and `reg32' a
+     32-bit one. `fpureg' denotes one of the eight FPU stack registers,
+     `mmxreg' denotes one of the eight 64-bit MMX registers, and
+     `segreg' denotes a segment register. In addition, some registers
+     (such as `AL', `DX' or `ECX') may be specified explicitly.
+
+   * Immediate operands: `imm' denotes a generic immediate operand.
+     `imm8', `imm16' and `imm32' are used when the operand is intended
+     to be a specific size. For some of these instructions, NASM needs
+     an explicit specifier: for example, `ADD ESP,16' could be
+     interpreted as either `ADD r/m32,imm32' or `ADD r/m32,imm8'. NASM
+     chooses the former by default, and so you must specify `ADD
+     ESP,BYTE 16' for the latter.
+
+   * Memory references: `mem' denotes a generic memory reference;
+     `mem8', `mem16', `mem32', `mem64' and `mem80' are used when the
+     operand needs to be a specific size. Again, a specifier is needed
+     in some cases: `DEC [address]' is ambiguous and will be rejected
+     by NASM. You must specify `DEC BYTE [address]', `DEC WORD
+     [address]' or `DEC DWORD [address]' instead.
+
+   * Restricted memory references: one form of the `MOV' instruction
+     allows a memory address to be specified _without_ allowing the
+     normal range of register combinations and effective address
+     processing. This is denoted by `memoffs8', `memoffs16' and
+     `memoffs32'.
+
+   * Register or memory choices: many instructions can accept either a
+     register _or_ a memory reference as an operand. `r/m8' is a
+     shorthand for `reg8/mem8'; similarly `r/m16' and `r/m32'. `r/m64'
+     is MMX-related, and is a shorthand for `mmxreg/mem64'.
+
+
+File: nasm.info,  Node: Section A.2,  Next: Section A.2.1,  Prev: Section A.1,  Up: Appendix A
+
+A.2. Key to Opcode Descriptions
+*******************************
+
+   This appendix also provides the opcodes which NASM will generate for
+each form of each instruction. The opcodes are listed in the following
+way:
+
+   * A hex number, such as `3F', indicates a fixed byte containing that
+     number.
+
+   * A hex number followed by `+r', such as `C8+r', indicates that one
+     of the operands to the instruction is a register, and the
+     `register value' of that register should be added to the hex
+     number to produce the generated byte. For example, EDX has
+     register value 2, so the code `C8+r', when the register operand is
+     EDX, generates the hex byte `CA'. Register values for specific
+     registers are given in *Note Section A.2.1::.
+
+   * A hex number followed by `+cc', such as `40+cc', indicates that
+     the instruction name has a condition code suffix, and the numeric
+     representation of the condition code should be added to the hex
+     number to produce the generated byte. For example, the code
+     `40+cc', when the instruction contains the `NE' condition,
+     generates the hex byte `45'. Condition codes and their numeric
+     representations are given in *Note Section A.2.2::.
+
+   * A slash followed by a digit, such as `/2', indicates that one of
+     the operands to the instruction is a memory address or register
+     (denoted `mem' or `r/m', with an optional size). This is to be
+     encoded as an effective address, with a ModR/M byte, an optional
+     SIB byte, and an optional displacement, and the spare (register)
+     field of the ModR/M byte should be the digit given (which will be
+     from 0 to 7, so it fits in three bits). The encoding of effective
+     addresses is given in *Note Section A.2.3::.
+
+   * The code `/r' combines the above two: it indicates that one of the
+     operands is a memory address or `r/m', and another is a register,
+     and that an effective address should be generated with the spare
+     (register) field in the ModR/M byte being equal to the `register
+     value' of the register operand. The encoding of effective
+     addresses is given in *Note Section A.2.3::; register values are
+     given in *Note Section A.2.1::.
+
+   * The codes `ib', `iw' and `id' indicate that one of the operands to
+     the instruction is an immediate value, and that this is to be
+     encoded as a byte, little-endian word or little-endian doubleword
+     respectively.
+
+   * The codes `rb', `rw' and `rd' indicate that one of the operands to
+     the instruction is an immediate value, and that the _difference_
+     between this value and the address of the end of the instruction
+     is to be encoded as a byte, word or doubleword respectively.
+     Where the form `rw/rd' appears, it indicates that either `rw' or
+     `rd' should be used according to whether assembly is being
+     performed in `BITS 16' or `BITS 32' state respectively.
+
+   * The codes `ow' and `od' indicate that one of the operands to the
+     instruction is a reference to the contents of a memory address
+     specified as an immediate value: this encoding is used in some
+     forms of the `MOV' instruction in place of the standard
+     effective-address mechanism. The displacement is encoded as a word
+     or doubleword. Again, `ow/od' denotes that `ow' or `od' should be
+     chosen according to the `BITS' setting.
+
+   * The codes `o16' and `o32' indicate that the given form of the
+     instruction should be assembled with operand size 16 or 32 bits.
+     In other words, `o16' indicates a `66' prefix in `BITS 32' state,
+     but generates no code in `BITS 16' state; and `o32' indicates a
+     `66' prefix in `BITS 16' state but generates nothing in `BITS 32'.
+
+   * The codes `a16' and `a32', similarly to `o16' and `o32', indicate
+     the address size of the given form of the instruction.  Where this
+     does not match the `BITS' setting, a `67' prefix is required.
+
+* Menu:
+
+* Section A.2.1:: Register Values
+* Section A.2.2:: Condition Codes
+* Section A.2.3:: Effective Address Encoding: ModR/M and SIB
+
+
+File: nasm.info,  Node: Section A.2.1,  Next: Section A.2.2,  Prev: Section A.2,  Up: Section A.2
+
+A.2.1. Register Values
+**********************
+
+   Where an instruction requires a register value, it is already
+implicit in the encoding of the rest of the instruction what type of
+register is intended: an 8-bit general-purpose register, a segment
+register, a debug register, an MMX register, or whatever. Therefore
+there is no problem with registers of different types sharing an
+encoding value.
+
+   The encodings for the various classes of register are:
+
+   * 8-bit general registers: `AL' is 0, `CL' is 1, `DL' is 2, `BL' is
+     3, `AH' is 4, `CH' is 5, `DH' is 6, and `BH' is 7.
+
+   * 16-bit general registers: `AX' is 0, `CX' is 1, `DX' is 2, `BX' is
+     3, `SP' is 4, `BP' is 5, `SI' is 6, and `DI' is 7.
+
+   * 32-bit general registers: `EAX' is 0, `ECX' is 1, `EDX' is 2,
+     `EBX' is 3, `ESP' is 4, `EBP' is 5, `ESI' is 6, and `EDI' is 7.
+
+   * Segment registers: `ES' is 0, `CS' is 1, `SS' is 2, `DS' is 3,
+     `FS' is 4, and `GS' is 5.
+
+   * {Floating-point registers}: `ST0' is 0, `ST1' is 1, `ST2' is 2,
+     `ST3' is 3, `ST4' is 4, `ST5' is 5, `ST6' is 6, and `ST7' is 7.
+
+   * 64-bit MMX registers: `MM0' is 0, `MM1' is 1, `MM2' is 2, `MM3' is
+     3, `MM4' is 4, `MM5' is 5, `MM6' is 6, and `MM7' is 7.
+
+   * Control registers: `CR0' is 0, `CR2' is 2, `CR3' is 3, and `CR4'
+     is 4.
+
+   * Debug registers: `DR0' is 0, `DR1' is 1, `DR2' is 2, `DR3' is 3,
+     `DR6' is 6, and `DR7' is 7.
+
+   * Test registers: `TR3' is 3, `TR4' is 4, `TR5' is 5, `TR6' is 6,
+     and `TR7' is 7.
+
+   (Note that wherever a register name contains a number, that number
+is also the register value for that register.)
+
+
+File: nasm.info,  Node: Section A.2.2,  Next: Section A.2.3,  Prev: Section A.2.1,  Up: Section A.2
+
+A.2.2. Condition Codes
+**********************
+
+   The available condition codes are given here, along with their
+numeric representations as part of opcodes. Many of these condition
+codes have synonyms, so several will be listed at a time.
+
+   In the following descriptions, the word `either', when applied to two
+possible trigger conditions, is used to mean `either or both'. If
+`either but not both' is meant, the phrase `exactly one of' is used.
+
+   * `O' is 0 (trigger if the overflow flag is set); `NO' is 1.
+
+   * `B', `C' and `NAE' are 2 (trigger if the carry flag is set); `AE',
+     `NB' and `NC' are 3.
+
+   * `E' and `Z' are 4 (trigger if the zero flag is set); `NE' and `NZ'
+     are 5.
+
+   * `BE' and `NA' are 6 (trigger if either of the carry or zero flags
+     is set); `A' and `NBE' are 7.
+
+   * `S' is 8 (trigger if the sign flag is set); `NS' is 9.
+
+   * `P' and `PE' are 10 (trigger if the parity flag is set); `NP' and
+     `PO' are 11.
+
+   * `L' and `NGE' are 12 (trigger if exactly one of the sign and
+     overflow flags is set); `GE' and `NL' are 13.
+
+   * `LE' and `NG' are 14 (trigger if either the zero flag is set, or
+     exactly one of the sign and overflow flags is set); `G' and `NLE'
+     are 15.
+
+   Note that in all cases, the sense of a condition code may be
+reversed by changing the low bit of the numeric representation.
+
+
+File: nasm.info,  Node: Section A.2.3,  Next: Section A.3,  Prev: Section A.2.2,  Up: Section A.2
+
+A.2.3. Effective Address Encoding: ModR/M and SIB
+*************************************************
+
+   An effective address is encoded in up to three parts: a ModR/M byte,
+an optional SIB byte, and an optional byte, word or doubleword
+displacement field.
+
+   The ModR/M byte consists of three fields: the `mod' field, ranging
+from 0 to 3, in the upper two bits of the byte, the `r/m' field,
+ranging from 0 to 7, in the lower three bits, and the spare (register)
+field in the middle (bit 3 to bit 5). The spare field is not relevant to
+the effective address being encoded, and either contains an extension to
+the instruction opcode or the register value of another operand.
+
+   The ModR/M system can be used to encode a direct register reference
+rather than a memory access. This is always done by setting the `mod'
+field to 3 and the `r/m' field to the register value of the register in
+question (it must be a general-purpose register, and the size of the
+register must already be implicit in the encoding of the rest of the
+instruction). In this case, the SIB byte and displacement field are both
+absent.
+
+   In 16-bit addressing mode (either `BITS 16' with no `67' prefix, or
+`BITS 32' with a `67' prefix), the SIB byte is never used. The general
+rules for `mod' and `r/m' (there is an exception, given below) are:
+
+   * The `mod' field gives the length of the displacement field: 0
+     means no displacement, 1 means one byte, and 2 means two bytes.
+
+   * The `r/m' field encodes the combination of registers to be added to
+     the displacement to give the accessed address: 0 means `BX+SI', 1
+     means `BX+DI', 2 means `BP+SI', 3 means `BP+DI', 4 means `SI'
+     only, 5 means `DI' only, 6 means `BP' only, and 7 means `BX' only.
+
+   However, there is a special case:
+
+   * If `mod' is 0 and `r/m' is 6, the effective address encoded is not
+     `[BP]' as the above rules would suggest, but instead `[disp16]':
+     the displacement field is present and is two bytes long, and no
+     registers are added to the displacement.
+
+   Therefore the effective address `[BP]' cannot be encoded as
+efficiently as `[BX]'; so if you code `[BP]' in a program, NASM adds a
+notional 8-bit zero displacement, and sets `mod' to 1, `r/m' to 6, and
+the one-byte displacement field to 0.
+
+   In 32-bit addressing mode (either `BITS 16' with a `67' prefix, or
+`BITS 32' with no `67' prefix) the general rules (again, there are
+exceptions) for `mod' and `r/m' are:
+
+   * The `mod' field gives the length of the displacement field: 0
+     means no displacement, 1 means one byte, and 2 means four bytes.
+
+   * If only one register is to be added to the displacement, and it is
+     not `ESP', the `r/m' field gives its register value, and the SIB
+     byte is absent. If the `r/m' field is 4 (which would encode `ESP'),
+     the SIB byte is present and gives the combination and scaling of
+     registers to be added to the displacement.
+
+   If the SIB byte is present, it describes the combination of
+registers (an optional base register, and an optional index register
+scaled by multiplication by 1, 2, 4 or 8) to be added to the
+displacement. The SIB byte is divided into the `scale' field, in the
+top two bits, the `index' field in the next three, and the `base' field
+in the bottom three. The general rules are:
+
+   * The `base' field encodes the register value of the base register.
+
+   * The `index' field encodes the register value of the index register,
+     unless it is 4, in which case no index register is used (so `ESP'
+     cannot be used as an index register).
+
+   * The `scale' field encodes the multiplier by which the index
+     register is scaled before adding it to the base and displacement:
+     0 encodes a multiplier of 1, 1 encodes 2, 2 encodes 4 and 3
+     encodes 8.
+
+   The exceptions to the 32-bit encoding rules are:
+
+   * If `mod' is 0 and `r/m' is 5, the effective address encoded is not
+     `[EBP]' as the above rules would suggest, but instead `[disp32]':
+     the displacement field is present and is four bytes long, and no
+     registers are added to the displacement.
+
+   * If `mod' is 0, `r/m' is 4 (meaning the SIB byte is present) and
+     `base' is 4, the effective address encoded is not `[EBP+index]' as
+     the above rules would suggest, but instead `[disp32+index]': the
+     displacement field is present and is four bytes long, and there is
+     no base register (but the index register is still processed in the
+     normal way).
+
+
+File: nasm.info,  Node: Section A.3,  Next: Section A.4,  Prev: Section A.2.3,  Up: Appendix A
+
+A.3. Key to Instruction Flags
+*****************************
+
+   Given along with each instruction in this appendix is a set of flags,
+denoting the type of the instruction. The types are as follows:
+
+   * `8086', `186', `286', `386', `486', `PENT' and `P6' denote the
+     lowest processor type that supports the instruction. Most
+     instructions run on all processors above the given type; those
+     that do not are documented. The Pentium II contains no additional
+     instructions beyond the P6 (Pentium Pro); from the point of view
+     of its instruction set, it can be thought of as a P6 with MMX
+     capability.
+
+   * `CYRIX' indicates that the instruction is specific to Cyrix
+     processors, for example the extra MMX instructions in the Cyrix
+     extended MMX instruction set.
+
+   * `FPU' indicates that the instruction is a floating-point one, and
+     will only run on machines with a coprocessor (automatically
+     including 486DX, Pentium and above).
+
+   * `MMX' indicates that the instruction is an MMX one, and will run on
+     MMX-capable Pentium processors and the Pentium II.
+
+   * `PRIV' indicates that the instruction is a protected-mode
+     management instruction. Many of these may only be used in
+     protected mode, or only at privilege level zero.
+
+   * `UNDOC' indicates that the instruction is an undocumented one, and
+     not part of the official Intel Architecture; it may or may not be
+     supported on any given machine.
+
+
+File: nasm.info,  Node: Section A.4,  Next: Section A.5,  Prev: Section A.3,  Up: Appendix A
+
+A.4. `AAA', `AAS', `AAM', `AAD': ASCII Adjustments
+**************************************************
+
+     AAA                           ; 37                   [8086]
+
+     AAS                           ; 3F                   [8086]
+
+     AAD                           ; D5 0A                [8086]
+     AAD imm                       ; D5 ib                [8086]
+
+     AAM                           ; D4 0A                [8086]
+     AAM imm                       ; D4 ib                [8086]
+
+   These instructions are used in conjunction with the add, subtract,
+multiply and divide instructions to perform binary-coded decimal
+arithmetic in _unpacked_ (one BCD digit per byte - easy to translate to
+and from ASCII, hence the instruction names) form. There are also
+packed BCD instructions `DAA' and `DAS': see *Note Section A.23::.
+
+   `AAA' should be used after a one-byte `ADD' instruction whose
+destination was the `AL' register: by means of examining the value in
+the low nibble of `AL' and also the auxiliary carry flag `AF', it
+determines whether the addition has overflowed, and adjusts it (and sets
+the carry flag) if so. You can add long BCD strings together by doing
+`ADD'/`AAA' on the low digits, then doing `ADC'/`AAA' on each
+subsequent digit.
+
+   `AAS' works similarly to `AAA', but is for use after `SUB'
+instructions rather than `ADD'.
+
+   `AAM' is for use after you have multiplied two decimal digits
+together and left the result in `AL': it divides `AL' by ten and stores
+the quotient in `AH', leaving the remainder in `AL'. The divisor 10 can
+be changed by specifying an operand to the instruction: a particularly
+handy use of this is `AAM 16', causing the two nibbles in `AL' to be
+separated into `AH' and `AL'.
+
+   `AAD' performs the inverse operation to `AAM': it multiplies `AH' by
+ten, adds it to `AL', and sets `AH' to zero. Again, the multiplier 10
+can be changed.
+
+
+File: nasm.info,  Node: Section A.5,  Next: Section A.6,  Prev: Section A.4,  Up: Appendix A
+
+A.5. `ADC': Add with Carry
+**************************
+
+     ADC r/m8,reg8                 ; 10 /r                [8086]
+     ADC r/m16,reg16               ; o16 11 /r            [8086]
+     ADC r/m32,reg32               ; o32 11 /r            [386]
+
+     ADC reg8,r/m8                 ; 12 /r                [8086]
+     ADC reg16,r/m16               ; o16 13 /r            [8086]
+     ADC reg32,r/m32               ; o32 13 /r            [386]
+
+     ADC r/m8,imm8                 ; 80 /2 ib             [8086]
+     ADC r/m16,imm16               ; o16 81 /2 iw         [8086]
+     ADC r/m32,imm32               ; o32 81 /2 id         [386]
+
+     ADC r/m16,imm8                ; o16 83 /2 ib         [8086]
+     ADC r/m32,imm8                ; o32 83 /2 ib         [386]
+
+     ADC AL,imm8                   ; 14 ib                [8086]
+     ADC AX,imm16                  ; o16 15 iw            [8086]
+     ADC EAX,imm32                 ; o32 15 id            [386]
+
+   `ADC' performs integer addition: it adds its two operands together,
+plus the value of the carry flag, and leaves the result in its
+destination (first) operand. The flags are set according to the result
+of the operation: in particular, the carry flag is affected and can be
+used by a subsequent `ADC' instruction.
+
+   In the forms with an 8-bit immediate second operand and a longer
+first operand, the second operand is considered to be signed, and is
+sign- extended to the length of the first operand. In these cases, the
+`BYTE' qualifier is necessary to force NASM to generate this form of
+the instruction.
+
+   To add two numbers without also adding the contents of the carry
+flag, use `ADD' (*Note Section A.6::).
+
+
+File: nasm.info,  Node: Section A.6,  Next: Section A.7,  Prev: Section A.5,  Up: Appendix A
+
+A.6. `ADD': Add Integers
+************************
+
+     ADD r/m8,reg8                 ; 00 /r                [8086]
+     ADD r/m16,reg16               ; o16 01 /r            [8086]
+     ADD r/m32,reg32               ; o32 01 /r            [386]
+
+     ADD reg8,r/m8                 ; 02 /r                [8086]
+     ADD reg16,r/m16               ; o16 03 /r            [8086]
+     ADD reg32,r/m32               ; o32 03 /r            [386]
+
+     ADD r/m8,imm8                 ; 80 /0 ib             [8086]
+     ADD r/m16,imm16               ; o16 81 /0 iw         [8086]
+     ADD r/m32,imm32               ; o32 81 /0 id         [386]
+
+     ADD r/m16,imm8                ; o16 83 /0 ib         [8086]
+     ADD r/m32,imm8                ; o32 83 /0 ib         [386]
+
+     ADD AL,imm8                   ; 04 ib                [8086]
+     ADD AX,imm16                  ; o16 05 iw            [8086]
+     ADD EAX,imm32                 ; o32 05 id            [386]
+
+   `ADD' performs integer addition: it adds its two operands together,
+and leaves the result in its destination (first) operand. The flags are
+set according to the result of the operation: in particular, the carry
+flag is affected and can be used by a subsequent `ADC' instruction
+(*Note Section A.5::).
+
+   In the forms with an 8-bit immediate second operand and a longer
+first operand, the second operand is considered to be signed, and is
+sign- extended to the length of the first operand. In these cases, the
+`BYTE' qualifier is necessary to force NASM to generate this form of
+the instruction.
+
+
+File: nasm.info,  Node: Section A.7,  Next: Section A.8,  Prev: Section A.6,  Up: Appendix A
+
+A.7. `AND': Bitwise AND
+***********************
+
+     AND r/m8,reg8                 ; 20 /r                [8086]
+     AND r/m16,reg16               ; o16 21 /r            [8086]
+     AND r/m32,reg32               ; o32 21 /r            [386]
+
+     AND reg8,r/m8                 ; 22 /r                [8086]
+     AND reg16,r/m16               ; o16 23 /r            [8086]
+     AND reg32,r/m32               ; o32 23 /r            [386]
+
+     AND r/m8,imm8                 ; 80 /4 ib             [8086]
+     AND r/m16,imm16               ; o16 81 /4 iw         [8086]
+     AND r/m32,imm32               ; o32 81 /4 id         [386]
+
+     AND r/m16,imm8                ; o16 83 /4 ib         [8086]
+     AND r/m32,imm8                ; o32 83 /4 ib         [386]
+
+     AND AL,imm8                   ; 24 ib                [8086]
+     AND AX,imm16                  ; o16 25 iw            [8086]
+     AND EAX,imm32                 ; o32 25 id            [386]
+
+   `AND' performs a bitwise AND operation between its two operands (i.e.
+each bit of the result is 1 if and only if the corresponding bits of the
+two inputs were both 1), and stores the result in the destination
+(first) operand.
+
+   In the forms with an 8-bit immediate second operand and a longer
+first operand, the second operand is considered to be signed, and is
+sign- extended to the length of the first operand. In these cases, the
+`BYTE' qualifier is necessary to force NASM to generate this form of
+the instruction.
+
+   The MMX instruction `PAND' (see *Note Section A.116::) performs the
+same operation on the 64-bit MMX registers.
+
+
+File: nasm.info,  Node: Section A.8,  Next: Section A.9,  Prev: Section A.7,  Up: Appendix A
+
+A.8. `ARPL': Adjust RPL Field of Selector
+*****************************************
+
+     ARPL r/m16,reg16              ; 63 /r                [286,PRIV]
+
+   `ARPL' expects its two word operands to be segment selectors. It
+adjusts the RPL (requested privilege level - stored in the bottom two
+bits of the selector) field of the destination (first) operand to
+ensure that it is no less (i.e. no more privileged than) the RPL field
+of the source operand. The zero flag is set if and only if a change had
+to be made.
+
+
+File: nasm.info,  Node: Section A.9,  Next: Section A.10,  Prev: Section A.8,  Up: Appendix A
+
+A.9. `BOUND': Check Array Index against Bounds
+**********************************************
+
+     BOUND reg16,mem               ; o16 62 /r            [186]
+     BOUND reg32,mem               ; o32 62 /r            [386]
+
+   `BOUND' expects its second operand to point to an area of memory
+containing two signed values of the same size as its first operand (i.e.
+two words for the 16-bit form; two doublewords for the 32-bit form). It
+performs two signed comparisons: if the value in the register passed as
+its first operand is less than the first of the in-memory values, or is
+greater than or equal to the second, it throws a BR exception.
+Otherwise, it does nothing.
+
+
+File: nasm.info,  Node: Section A.10,  Next: Section A.11,  Prev: Section A.9,  Up: Appendix A
+
+A.10. `BSF', `BSR': Bit Scan
+****************************
+
+     BSF reg16,r/m16               ; o16 0F BC /r         [386]
+     BSF reg32,r/m32               ; o32 0F BC /r         [386]
+
+     BSR reg16,r/m16               ; o16 0F BD /r         [386]
+     BSR reg32,r/m32               ; o32 0F BD /r         [386]
+
+   `BSF' searches for a set bit in its source (second) operand, starting
+from the bottom, and if it finds one, stores the index in its
+destination (first) operand. If no set bit is found, the contents of
+the destination operand are undefined.
+
+   `BSR' performs the same function, but searches from the top instead,
+so it finds the most significant set bit.
+
+   Bit indices are from 0 (least significant) to 15 or 31 (most
+significant).
+
+
+File: nasm.info,  Node: Section A.11,  Next: Section A.12,  Prev: Section A.10,  Up: Appendix A
+
+A.11. `BSWAP': Byte Swap
+************************
+
+     BSWAP reg32                   ; o32 0F C8+r          [486]
+
+   `BSWAP' swaps the order of the four bytes of a 32-bit register: bits
+0-7 exchange places with bits 24-31, and bits 8-15 swap with bits 16-23.
+There is no explicit 16-bit equivalent: to byte-swap `AX', `BX', `CX'
+or `DX', `XCHG' can be used.
+
+
+File: nasm.info,  Node: Section A.12,  Next: Section A.13,  Prev: Section A.11,  Up: Appendix A
+
+A.12. `BT', `BTC', `BTR', `BTS': Bit Test
+*****************************************
+
+     BT r/m16,reg16                ; o16 0F A3 /r         [386]
+     BT r/m32,reg32                ; o32 0F A3 /r         [386]
+     BT r/m16,imm8                 ; o16 0F BA /4 ib      [386]
+     BT r/m32,imm8                 ; o32 0F BA /4 ib      [386]
+
+     BTC r/m16,reg16               ; o16 0F BB /r         [386]
+     BTC r/m32,reg32               ; o32 0F BB /r         [386]
+     BTC r/m16,imm8                ; o16 0F BA /7 ib      [386]
+     BTC r/m32,imm8                ; o32 0F BA /7 ib      [386]
+
+     BTR r/m16,reg16               ; o16 0F B3 /r         [386]
+     BTR r/m32,reg32               ; o32 0F B3 /r         [386]
+     BTR r/m16,imm8                ; o16 0F BA /6 ib      [386]
+     BTR r/m32,imm8                ; o32 0F BA /6 ib      [386]
+
+     BTS r/m16,reg16               ; o16 0F AB /r         [386]
+     BTS r/m32,reg32               ; o32 0F AB /r         [386]
+     BTS r/m16,imm                 ; o16 0F BA /5 ib      [386]
+     BTS r/m32,imm                 ; o32 0F BA /5 ib      [386]
+
+   These instructions all test one bit of their first operand, whose
+index is given by the second operand, and store the value of that bit
+into the carry flag. Bit indices are from 0 (least significant) to 15
+or 31 (most significant).
+
+   In addition to storing the original value of the bit into the carry
+flag, `BTR' also resets (clears) the bit in the operand itself. `BTS'
+sets the bit, and `BTC' complements the bit. `BT' does not modify its
+operands.
+
+   The bit offset should be no greater than the size of the operand.
+
+
+File: nasm.info,  Node: Section A.13,  Next: Section A.14,  Prev: Section A.12,  Up: Appendix A
+
+A.13. `CALL': Call Subroutine
+*****************************
+
+     CALL imm                      ; E8 rw/rd             [8086]
+     CALL imm:imm16                ; o16 9A iw iw         [8086]
+     CALL imm:imm32                ; o32 9A id iw         [386]
+     CALL FAR mem16                ; o16 FF /3            [8086]
+     CALL FAR mem32                ; o32 FF /3            [386]
+     CALL r/m16                    ; o16 FF /2            [8086]
+     CALL r/m32                    ; o32 FF /2            [386]
+
+   `CALL' calls a subroutine, by means of pushing the current
+instruction pointer (`IP') and optionally `CS' as well on the stack,
+and then jumping to a given address.
+
+   `CS' is pushed as well as `IP' if and only if the call is a far
+call, i.e. a destination segment address is specified in the
+instruction.  The forms involving two colon-separated arguments are far
+calls; so are the `CALL FAR mem' forms.
+
+   You can choose between the two immediate far call forms (`CALL
+imm:imm') by the use of the `WORD' and `DWORD' keywords: `CALL WORD
+0x1234:0x5678') or `CALL DWORD 0x1234:0x56789abc'.
+
+   The `CALL FAR mem' forms execute a far call by loading the
+destination address out of memory. The address loaded consists of 16 or
+32 bits of offset (depending on the operand size), and 16 bits of
+segment. The operand size may be overridden using `CALL WORD FAR mem' or
+`CALL DWORD FAR mem'.
+
+   The `CALL r/m' forms execute a near call (within the same segment),
+loading the destination address out of memory or out of a register. The
+keyword `NEAR' may be specified, for clarity, in these forms, but is
+not necessary. Again, operand size can be overridden using `CALL WORD
+mem' or `CALL DWORD mem'.
+
+   As a convenience, NASM does not require you to call a far procedure
+symbol by coding the cumbersome `CALL SEG routine:routine', but instead
+allows the easier synonym `CALL FAR routine'.
+
+   The `CALL r/m' forms given above are near calls; NASM will accept the
+`NEAR' keyword (e.g. `CALL NEAR [address]'), even though it is not
+strictly necessary.
+
+
+File: nasm.info,  Node: Section A.14,  Next: Section A.15,  Prev: Section A.13,  Up: Appendix A
+
+A.14. `CBW', `CWD', `CDQ', `CWDE': Sign Extensions
+**************************************************
+
+     CBW                           ; o16 98               [8086]
+     CWD                           ; o16 99               [8086]
+     CDQ                           ; o32 99               [386]
+     CWDE                          ; o32 98               [386]
+
+   All these instructions sign-extend a short value into a longer one,
+by replicating the top bit of the original value to fill the extended
+one.
+
+   `CBW' extends `AL' into `AX' by repeating the top bit of `AL' in
+every bit of `AH'. `CWD' extends `AX' into `DX:AX' by repeating the top
+bit of `AX' throughout `DX'.  `CWDE' extends `AX' into `EAX', and `CDQ'
+extends `EAX' into `EDX:EAX'.
+
+
+File: nasm.info,  Node: Section A.15,  Next: Section A.16,  Prev: Section A.14,  Up: Appendix A
+
+A.15. `CLC', `CLD', `CLI', `CLTS': Clear Flags
+**********************************************
+
+     CLC                           ; F8                   [8086]
+     CLD                           ; FC                   [8086]
+     CLI                           ; FA                   [8086]
+     CLTS                          ; 0F 06                [286,PRIV]
+
+   These instructions clear various flags. `CLC' clears the carry flag;
+`CLD' clears the direction flag; `CLI' clears the interrupt flag (thus
+disabling interrupts); and `CLTS' clears the task-switched (`TS') flag
+in `CR0'.
+
+   To set the carry, direction, or interrupt flags, use the `STC',
+`STD' and `STI' instructions (*Note Section A.156::). To invert the
+carry flag, use `CMC' (*Note Section A.16::).
+
+
+File: nasm.info,  Node: Section A.16,  Next: Section A.17,  Prev: Section A.15,  Up: Appendix A
+
+A.16. `CMC': Complement Carry Flag
+**********************************
+
+     CMC                           ; F5                   [8086]
+
+   `CMC' changes the value of the carry flag: if it was 0, it sets it to
+1, and vice versa.
+
+
+File: nasm.info,  Node: Section A.17,  Next: Section A.18,  Prev: Section A.16,  Up: Appendix A
+
+A.17. `CMOVcc': Conditional Move
+********************************
+
+     CMOVcc reg16,r/m16            ; o16 0F 40+cc /r      [P6]
+     CMOVcc reg32,r/m32            ; o32 0F 40+cc /r      [P6]
+
+   `CMOV' moves its source (second) operand into its destination (first)
+operand if the given condition code is satisfied; otherwise it does
+nothing.
+
+   For a list of condition codes, see *Note Section A.2.2::.
+
+   Although the `CMOV' instructions are flagged `P6' above, they may
+not be supported by all Pentium Pro processors; the `CPUID' instruction
+(*Note Section A.22::) will return a bit which indicates whether
+conditional moves are supported.
+
+
+File: nasm.info,  Node: Section A.18,  Next: Section A.19,  Prev: Section A.17,  Up: Appendix A
+
+A.18. `CMP': Compare Integers
+*****************************
+
+     CMP r/m8,reg8                 ; 38 /r                [8086]
+     CMP r/m16,reg16               ; o16 39 /r            [8086]
+     CMP r/m32,reg32               ; o32 39 /r            [386]
+
+     CMP reg8,r/m8                 ; 3A /r                [8086]
+     CMP reg16,r/m16               ; o16 3B /r            [8086]
+     CMP reg32,r/m32               ; o32 3B /r            [386]
+
+     CMP r/m8,imm8                 ; 80 /0 ib             [8086]
+     CMP r/m16,imm16               ; o16 81 /0 iw         [8086]
+     CMP r/m32,imm32               ; o32 81 /0 id         [386]
+
+     CMP r/m16,imm8                ; o16 83 /0 ib         [8086]
+     CMP r/m32,imm8                ; o32 83 /0 ib         [386]
+
+     CMP AL,imm8                   ; 3C ib                [8086]
+     CMP AX,imm16                  ; o16 3D iw            [8086]
+     CMP EAX,imm32                 ; o32 3D id            [386]
+
+   `CMP' performs a `mental' subtraction of its second operand from its
+first operand, and affects the flags as if the subtraction had taken
+place, but does not store the result of the subtraction anywhere.
+
+   In the forms with an 8-bit immediate second operand and a longer
+first operand, the second operand is considered to be signed, and is
+sign- extended to the length of the first operand. In these cases, the
+`BYTE' qualifier is necessary to force NASM to generate this form of
+the instruction.
+
+
+File: nasm.info,  Node: Section A.19,  Next: Section A.20,  Prev: Section A.18,  Up: Appendix A
+
+A.19. `CMPSB', `CMPSW', `CMPSD': Compare Strings
+************************************************
+
+     CMPSB                         ; A6                   [8086]
+     CMPSW                         ; o16 A7               [8086]
+     CMPSD                         ; o32 A7               [386]
+
+   `CMPSB' compares the byte at `[DS:SI]' or `[DS:ESI]' with the byte
+at `[ES:DI]' or `[ES:EDI]', and sets the flags accordingly. It then
+increments or decrements (depending on the direction flag: increments
+if the flag is clear, decrements if it is set) `SI' and `DI' (or `ESI'
+and `EDI').
+
+   The registers used are `SI' and `DI' if the address size is 16 bits,
+and `ESI' and `EDI' if it is 32 bits. If you need to use an address
+size not equal to the current `BITS' setting, you can use an explicit
+`a16' or `a32' prefix.
+
+   The segment register used to load from `[SI]' or `[ESI]' can be
+overridden by using a segment register name as a prefix (for example,
+`es cmpsb'). The use of `ES' for the load from `[DI]' or `[EDI]' cannot
+be overridden.
+
+   `CMPSW' and `CMPSD' work in the same way, but they compare a word or
+a doubleword instead of a byte, and increment or decrement the
+addressing registers by 2 or 4 instead of 1.
+
+   The `REPE' and `REPNE' prefixes (equivalently, `REPZ' and `REPNZ')
+may be used to repeat the instruction up to `CX' (or `ECX' - again, the
+address size chooses which) times until the first unequal or equal byte
+is found.
+
+
+File: nasm.info,  Node: Section A.20,  Next: Section A.21,  Prev: Section A.19,  Up: Appendix A
+
+A.20. `CMPXCHG', `CMPXCHG486': Compare and Exchange
+***************************************************
+
+     CMPXCHG r/m8,reg8             ; 0F B0 /r             [PENT]
+     CMPXCHG r/m16,reg16           ; o16 0F B1 /r         [PENT]
+     CMPXCHG r/m32,reg32           ; o32 0F B1 /r         [PENT]
+
+     CMPXCHG486 r/m8,reg8          ; 0F A6 /r             [486,UNDOC]
+     CMPXCHG486 r/m16,reg16        ; o16 0F A7 /r         [486,UNDOC]
+     CMPXCHG486 r/m32,reg32        ; o32 0F A7 /r         [486,UNDOC]
+
+   These two instructions perform exactly the same operation; however,
+apparently some (not all) 486 processors support it under a non-standard
+opcode, so NASM provides the undocumented `CMPXCHG486' form to generate
+the non-standard opcode.
+
+   `CMPXCHG' compares its destination (first) operand to the value in
+`AL', `AX' or `EAX' (depending on the size of the instruction). If they
+are equal, it copies its source (second) operand into the destination
+and sets the zero flag. Otherwise, it clears the zero flag and leaves
+the destination alone.
+
+   `CMPXCHG' is intended to be used for atomic operations in
+multitasking or multiprocessor environments. To safely update a value
+in shared memory, for example, you might load the value into `EAX',
+load the updated value into `EBX', and then execute the instruction
+`lock cmpxchg [value],ebx'. If `value' has not changed since being
+loaded, it is updated with your desired new value, and the zero flag is
+set to let you know it has worked. (The `LOCK' prefix prevents another
+processor doing anything in the middle of this operation: it guarantees
+atomicity.) However, if another processor has modified the value in
+between your load and your attempted store, the store does not happen,
+and you are notified of the failure by a cleared zero flag, so you can
+go round and try again.
+
+
+File: nasm.info,  Node: Section A.21,  Next: Section A.22,  Prev: Section A.20,  Up: Appendix A
+
+A.21. `CMPXCHG8B': Compare and Exchange Eight Bytes
+***************************************************
+
+     CMPXCHG8B mem                 ; 0F C7 /1             [PENT]
+
+   This is a larger and more unwieldy version of `CMPXCHG': it compares
+the 64-bit (eight-byte) value stored at `[mem]' with the value in
+`EDX:EAX'. If they are equal, it sets the zero flag and stores
+`ECX:EBX' into the memory area. If they are unequal, it clears the zero
+flag and leaves the memory area untouched.
+

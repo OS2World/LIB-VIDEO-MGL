@@ -1,0 +1,76 @@
+/****************************************************************************
+*
+*						Display Doctor Control Center
+*
+*               Copyright (C) 1991-1998 SciTech Software, Inc.
+*                            All rights reserved.             
+*
+*  ======================================================================
+*  |REMOVAL OR MODIFICATION OF THIS HEADER IS STRICTLY PROHIBITED BY LAW|
+*  |                                                                    |
+*  |This copyrighted computer code is a proprietary trade secret of     |
+*  |SciTech Software, Inc., located at 505 Wall Street, Chico, CA 95928 |
+*  |USA (www.scitechsoft.com).  ANY UNAUTHORIZED POSSESSION, USE,       |
+*  |VIEWING, COPYING, MODIFICATION OR DISSEMINATION OF THIS CODE IS     |
+*  |STRICTLY PROHIBITED BY LAW.  Unless you have current, express       |
+*  |written authorization from SciTech to possess or use this code, you |
+*  |may be subject to civil and/or criminal penalties.                  |
+*  |                                                                    |
+*  |If you received this code in error or you would like to report      |
+*  |improper use, please immediately contact SciTech Software, Inc. at  |
+*  |530-894-8400.                                                       |
+*  |                                                                    |
+*  |REMOVAL OR MODIFICATION OF THIS HEADER IS STRICTLY PROHIBITED BY LAW|
+*  ======================================================================
+*
+* Language:		Windows Resource Compiler
+* Environment:	Windows 95
+*
+* Description:  Resource module to implement the version info resource
+*				for DLL's and EXE's. Simply define the following before
+*				including this file:
+*
+*					FILE_DESCRIPTION	- Description of file (same as .DEF)
+*					ORIG_FILENAME		- Name of file in SDD install
+*					WIN32_DLL			- Define this for Win32 code
+*
+****************************************************************************/
+
+#include <ver.h>
+#include "sdd/sddver.h"
+#include "sdd/sddbld.h"
+
+#define	SDD_VERSION_STR	SDD_RELEASE_MAJOR_STR "." SDD_RELEASE_MINOR_STR " build " BUILD_NUMBER
+
+VERSIONINFO_1 VERSIONINFO
+FILEVERSION 	SDD_RELEASE_MAJOR, SDD_RELEASE_MINOR, 0, 0
+PRODUCTVERSION	SDD_RELEASE_MAJOR, SDD_RELEASE_MINOR, 0, 0
+#ifdef	WIN32_DLL
+FILEOS 			VOS_DOS_WINDOWS32
+#else
+FILEOS 			VOS_DOS_WINDOWS16
+#endif
+FILETYPE VFT_APP
+{
+ BLOCK "StringFileInfo"
+ {
+  BLOCK "040904E4"
+  {
+   VALUE "CompanyName", 		"SciTech Software, Inc.\0"
+   VALUE "FileDescription",		FILE_DESCRIPTION "\0"
+   VALUE "FileVersion", 		SDD_VERSION_STR "\0"
+   VALUE "InternalName", 		ORIG_FILENAME "\0"
+   VALUE "LegalCopyright", 		"Copyright \251 SciTech Software, Inc. 1992-1998\0"
+   VALUE "OriginalFilename", 	ORIG_FILENAME "\0"
+   VALUE "ProductName", 		"SciTech Display Doctor\0"
+   VALUE "ProductVersion", 		SDD_VERSION_STR "\0"
+  }
+
+ }
+
+ BLOCK "VarFileInfo"
+ {
+  VALUE "Translation", 0x409, 1252
+ }
+
+}

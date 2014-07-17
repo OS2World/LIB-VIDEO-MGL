@@ -1,0 +1,20 @@
+#define IDD_MAINDLG         1000
+
+#define IDC_OK              1
+#define IDC_CANCEL          2
+#define IDC_MODELIST        100
+#define IDC_VERSIONSTR      107
+#define IDC_COPYRIGHTSTR    108
+#define IDC_SELECT_VIDEO	109
+#define IDC_HWMEMDBUF		110
+#define IDC_HWMEM			111
+#define IDC_SYSMEMDBUF		112
+#define IDC_LINMEM			113
+#define IDC_SYSMEM			114
+#define IDC_AUTODETECT		115
+
+#define ID_APP              10000
+
+#define MAX_MODES   15
+#define MAX_STR     100
+
